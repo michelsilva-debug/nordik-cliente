@@ -342,7 +342,15 @@ export function Agendamento() {
             <p className="text-[15px] text-white/90 max-w-[280px] mx-auto leading-relaxed">
               O seu lugar na cadeira já está garantido para dia <strong className="text-[var(--color-nordik-gold-light)]">{format(dataSelecionada, 'dd/MM')} às {horaSelecionada}</strong>.
             </p>
-            <div className="w-full pt-12">
+            <div className="w-full pt-12 space-y-4">
+              <a 
+                href={`https://wa.me/5566996991681?text=Olá Nørdik! Acabei de agendar meu ${servicoSelecionado?.nome} para o dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
+              >
+                Confirmar pelo WhatsApp
+              </a>
               <button 
                 onClick={() => window.location.href = '/'}
                 className="bg-transparent border border-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold)] hover:text-black hover:border-[var(--color-nordik-gold)] font-bold uppercase tracking-widest py-5 px-6 w-full transition-all backdrop-blur-sm"
