@@ -1,15 +1,21 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { CalendarDays } from 'lucide-react';
 import { Agendamento } from './pages/Agendamento';
+import { Vip } from './pages/Vip';
+import { Crown } from 'lucide-react';
 
 // Layout Base
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[var(--color-nordik-bg)] shadow-2xl relative border-x border-[var(--color-nordik-border)]">
       {/* Header Mobile */}
-      <header className="py-6 px-8 flex flex-col items-center border-b border-[var(--color-nordik-gold-dark)]">
+      <header className="py-6 px-8 flex justify-between items-center border-b border-[var(--color-nordik-gold-dark)] relative">
+        <div className="w-8"></div> {/* Spacer */}
         <Link to="/">
-          <img src="/logo.png" alt="Nordik Barbershop" className="h-24 object-contain mt-2" />
+          <img src="/logo.png" alt="Nordik Barbershop" className="h-20 object-contain" />
+        </Link>
+        <Link to="/vip" className="text-[var(--color-nordik-gold)] hover:text-white transition-colors" title="Acesso VIP">
+          <Crown size={24} />
         </Link>
       </header>
 
@@ -185,6 +191,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/agendar" element={<Agendamento />} />
+          <Route path="/vip" element={<Vip />} />
         </Routes>
       </Layout>
     </Router>
