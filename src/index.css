@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-nordik-gold: #d4af37;
+  --color-nordik-gold-light: #c8bfa0;
+  --color-nordik-gold-dim: #5a4e30;
+  --color-nordik-gold-dimmer: #4a3a10;
+  --color-nordik-gold-dark: #c8a030;
+  --color-nordik-green: #4a8a5a;
+  --color-nordik-red: #8a4040;
+  
+  --color-nordik-bg: #000000;
+  --color-nordik-panel: #0d0d0d;
+  --color-nordik-panel-light: #111111;
+  --color-nordik-border: #1e1a10;
+  
+  --font-cinzel: "Cinzel", serif;
+  --font-jost: "Jost", sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-nordik-bg);
+    color: var(--color-nordik-gold-light);
+    font-family: var(--font-jost);
+  }
+}
