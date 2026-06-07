@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays, Scissors } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { Agendamento } from './pages/Agendamento';
 
 // Layout Base

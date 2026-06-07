@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { ChevronRight, ChevronLeft, Calendar as CalendarIcon, Clock, Scissors, User, CheckCircle2 } from 'lucide-react';
-import { format, addDays, startOfToday, parseISO } from 'date-fns';
+import { ChevronRight, ChevronLeft, Calendar as CalendarIcon, User, CheckCircle2 } from 'lucide-react';
+import { format, addDays, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface Barbeiro { id: string; nome: string; }
