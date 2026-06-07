@@ -139,9 +139,9 @@ export function Agendamento() {
         .insert([{
           data: dataStr,
           horario: horaSelecionada,
-          cliente_id: clienteId
-          // barbeiro_id e servico_id não existem no schema original,
-          // se existirem, adicione aqui. Caso contrário, ignoramos.
+          cliente_id: clienteId,
+          barbeiro_id: barbeiroSelecionado?.id,
+          servico_id: servicoSelecionado?.id
         }]);
 
       if (errAgenda) throw errAgenda;
