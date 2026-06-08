@@ -9,13 +9,13 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[var(--color-nordik-bg)] shadow-2xl relative border-x border-[var(--color-nordik-border)]">
       {/* Header Mobile */}
-      <header className="py-6 px-8 flex justify-between items-center border-b border-[var(--color-nordik-gold-dark)] relative">
-        <div className="w-8"></div> {/* Spacer */}
+      <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6">
         <Link to="/">
           <img src="/logo.png" alt="Nordik Barbershop" className="h-20 object-contain" />
         </Link>
-        <Link to="/vip" className="text-[var(--color-nordik-gold)] hover:text-white transition-colors" title="Acesso VIP">
+        <Link to="/vip" className="absolute right-6 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors" title="Acesso VIP">
           <Crown size={24} />
+          <span className="text-[8px] font-bold uppercase tracking-widest mt-1">Área VIP</span>
         </Link>
       </header>
 
