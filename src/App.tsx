@@ -228,6 +228,52 @@ function Home() {
         </div>
       </section>
 
+      {/* 4.6 CANTINHO PREMIUM DE BEBIDAS */}
+      <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
+        <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+          Nordik Lounge
+        </h2>
+        <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">Nosso Cantinho de Bebidas</p>
+        
+        <div className="text-[13px] text-[var(--color-nordik-gold-light)] leading-relaxed max-w-sm mb-10 space-y-4">
+          <p>Sua experiência completa. Desfrute de uma bebida gelada enquanto cuidamos do seu visual.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-y-10 gap-x-4 w-full max-w-sm">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+              <span className="text-2xl">🍺</span>
+            </div>
+            <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">Cervejas Premium</span>
+            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Heineken • Eisenbahn • Patagonia</span>
+          </div>
+          
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+              <span className="text-2xl">⚡</span>
+            </div>
+            <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">Energéticos</span>
+            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Red Bull Clássico</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+              <span className="text-2xl">🥤</span>
+            </div>
+            <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">Refrigerantes</span>
+            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Coca-Cola Lata</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+              <span className="text-2xl">🧃</span>
+            </div>
+            <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">Kids</span>
+            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Toddynho Gelado</span>
+          </div>
+        </div>
+      </section>
+
       {/* 5. LOCALIZAÇÃO */}
       <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
         <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
