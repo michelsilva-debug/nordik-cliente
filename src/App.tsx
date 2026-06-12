@@ -170,6 +170,64 @@ function Home() {
         </div>
       </section>
 
+      {/* 4.5 NOSSO DIFERENCIAL - BARBOTERAPIA */}
+      <section className="py-16 px-8 bg-black/30 border-t border-[var(--color-nordik-gold-dim)]/20">
+        <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+          Barboterapia
+        </h2>
+        <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">O Nosso Diferencial</p>
+        
+        <div className="space-y-6 max-w-sm mx-auto">
+          <div className="flex gap-4 items-start">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+              <span className="text-[var(--color-nordik-gold)] text-lg">✨</span>
+            </div>
+            <div>
+              <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">Finalização Premium</h3>
+              <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                Produtos exclusivos para hidratação e perfumação dos fios.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-start">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+              <span className="text-[var(--color-nordik-gold)] text-lg">💆‍♂️</span>
+            </div>
+            <div>
+              <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">Massagem Relaxante</h3>
+              <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                Alivia tensões faciais e proporciona uma experiência diferenciada.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-start">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+              <span className="text-[var(--color-nordik-gold)] text-lg">💨</span>
+            </div>
+            <div>
+              <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">Tratamento com Ozônio</h3>
+              <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                Higienização avançada com sensação de frescor e cuidado da pele.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-4 items-start">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+              <span className="text-[var(--color-nordik-gold)] text-lg">♨️</span>
+            </div>
+            <div>
+              <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">Toalha Quente</h3>
+              <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                Abertura dos poros promovendo maior conforto durante o serviço.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 5. LOCALIZAÇÃO */}
       <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
         <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
