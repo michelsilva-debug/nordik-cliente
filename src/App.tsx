@@ -209,7 +209,7 @@ function Home() {
             <div>
               <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">Tratamento com Ozônio</h3>
               <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
-                Higienização avançada com sensação de frescor e cuidado da pele.
+                Higiene bem-estar, e experiência diferenciada.
               </p>
             </div>
           </div>
