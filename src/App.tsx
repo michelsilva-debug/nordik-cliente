@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, MapPin } from 'lucide-react';
 import { Agendamento } from './pages/Agendamento';
 import { Vip } from './pages/Vip';
 import { Crown } from 'lucide-react';
@@ -170,7 +170,31 @@ function Home() {
         </div>
       </section>
 
-      {/* 5. CTA FINAL */}
+      {/* 5. LOCALIZAÇÃO */}
+      <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
+        <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
+          Localização
+        </h2>
+        <a 
+          href="https://maps.google.com/?q=Rua+Lobato,+Lote+36,+Quadra+48,+Setor+G,+Módulo+05,+Juína+-+MT" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-4 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] transition-colors group"
+        >
+          <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center text-[var(--color-nordik-gold)] group-hover:bg-[var(--color-nordik-gold)] group-hover:text-black transition-all">
+            <MapPin size={24} />
+          </div>
+          <span className="text-[13px] leading-relaxed max-w-sm">
+            Rua Lobato, Lote 36, Quadra 48, Setor G<br/>
+            Bairro Módulo 05, Juína - MT
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold group-hover:text-[var(--color-nordik-gold)]">
+            Abrir no Google Maps
+          </span>
+        </a>
+      </section>
+
+      {/* 6. CTA FINAL */}
       <section className="px-8 mt-4 mb-4">
         <Link 
           to="/agendar" 
