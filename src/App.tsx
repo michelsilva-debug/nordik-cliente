@@ -176,7 +176,7 @@ function Home() {
           Localização
         </h2>
         <a 
-          href="https://maps.google.com/?q=Rua+Lobato,+Lote+36,+Quadra+48,+Setor+G,+Módulo+05,+Juína+-+MT" 
+          href="https://maps.google.com/?q=R.+Astorga,+244+-+Módulo+05,+Juína+-+MT" 
           target="_blank" 
           rel="noopener noreferrer"
           className="flex flex-col items-center gap-4 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] transition-colors group"
@@ -185,8 +185,8 @@ function Home() {
             <MapPin size={24} />
           </div>
           <span className="text-[13px] leading-relaxed max-w-sm">
-            Rua Lobato, Lote 36, Quadra 48, Setor G<br/>
-            Bairro Módulo 05, Juína - MT
+            R. Astorga, 244 - Módulo 05<br/>
+            Juína - MT
           </span>
           <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold group-hover:text-[var(--color-nordik-gold)]">
             Abrir no Google Maps
