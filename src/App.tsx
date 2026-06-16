@@ -4,12 +4,43 @@ import { Agendamento } from './pages/Agendamento';
 import { Vip } from './pages/Vip';
 import { Crown } from 'lucide-react';
 
+// Ícone do Instagram (SVG inline, pois lucide-react não exporta Instagram nesta versão)
+function InstagramIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
+
 // Layout Base
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[var(--color-nordik-bg)] shadow-2xl relative border-x border-[var(--color-nordik-border)]">
       {/* Header Mobile */}
       <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6">
+        <a 
+          href="https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="absolute left-6 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors"
+          title="Siga no Instagram"
+        >
+          <InstagramIcon size={24} />
+          <span className="text-[8px] font-bold uppercase tracking-widest mt-1">Insta</span>
+        </a>
         <Link to="/">
           <img src="/logo.png" alt="Nordik Barbershop" className="h-20 object-contain" />
         </Link>
