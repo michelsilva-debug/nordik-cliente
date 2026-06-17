@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Crown, Shield, Sword } from 'lucide-react';
+import { CalendarDays, MapPin, Crown, Shield, Sword, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { Agendamento } from './pages/Agendamento';
@@ -117,7 +117,7 @@ function Home() {
           </p>
         </div>
 
-        <div className="relative z-10 w-full mb-8 animate-in fade-in zoom-in duration-1000 delay-500">
+        <div className="relative z-10 w-full mb-8 animate-in fade-in zoom-in duration-1000 delay-500 flex flex-col gap-3">
           <Link 
             to="/agendar" 
             className="bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-[0_0_20px_rgba(202,165,101,0.3)]"
@@ -125,6 +125,17 @@ function Home() {
             <CalendarDays size={20} />
             Agendar Horário
           </Link>
+
+          {planos.length > 0 && (
+            <button 
+              onClick={() => document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' })}
+              className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] hover:border-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-4 px-6 w-full flex items-center justify-center gap-3 transition-colors"
+            >
+              <Crown size={18} />
+              Ver Planos Mensais
+              <ChevronDown size={18} />
+            </button>
+          )}
         </div>
       </section>
 
@@ -336,7 +347,7 @@ function Home() {
 
       {/* 4.7 PLANOS MENSAIS */}
       {planos.length > 0 && (
-        <section className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20">
+        <section id="planos" className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20 scroll-mt-6">
           <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)]">
             <Crown size={28} />
           </div>
