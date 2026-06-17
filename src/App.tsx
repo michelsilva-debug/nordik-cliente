@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays, MapPin } from 'lucide-react';
+import { CalendarDays, MapPin, Crown, Shield, Sword } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import { Agendamento } from './pages/Agendamento';
 import { Vip } from './pages/Vip';
-import { Crown } from 'lucide-react';
 
 // Ícone do Instagram (SVG inline, pois lucide-react não exporta Instagram nesta versão)
 function InstagramIcon({ size = 24 }: { size?: number }) {
@@ -67,6 +68,34 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 // Tela Inicial (Home - Landing Page Premium)
 function Home() {
+  const [planos, setPlanos] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchPlanos() {
+      const { data } = await supabase
+        .from('planos')
+        .select('*')
+        .eq('ativo', true)
+        .order('preco');
+      if (data) setPlanos(data);
+    }
+    fetchPlanos();
+  }, []);
+
+  const getPlanoIcon = (nome: string) => {
+    const n = nome.toLowerCase();
+    if (n.includes('viking')) return <Crown size={24} />;
+    if (n.includes('guerreiro')) return <Sword size={24} />;
+    return <Shield size={24} />;
+  };
+
+  const getPlanoTheme = (nome: string) => {
+    const n = nome.toLowerCase();
+    if (n.includes('viking')) return { border: 'border-[#c9a535]/50', text: 'text-[#c9a535]', bg: 'bg-[#c9a535]/5' };
+    if (n.includes('guerreiro')) return { border: 'border-[#b8956a]/50', text: 'text-[#b8956a]', bg: 'bg-[#b8956a]/5' };
+    return { border: 'border-[#8a7a6a]/50', text: 'text-[#8a7a6a]', bg: 'bg-[#8a7a6a]/5' };
+  };
+
   return (
     <div className="flex-1 flex flex-col -m-6 pb-12 bg-[#050505]">
       {/* 1. HERO SECTION */}
@@ -304,6 +333,68 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* 4.7 PLANOS MENSAIS */}
+      {planos.length > 0 && (
+        <section className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20">
+          <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)]">
+            <Crown size={28} />
+          </div>
+          <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+            Club Nørdik
+          </h2>
+          <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
+            Pague 3, Leve 4 cortes no mês
+          </p>
+
+          <div className="flex flex-col gap-6 w-full max-w-sm">
+            {planos.map(p => {
+              const theme = getPlanoTheme(p.nome);
+              const linkWhats = `https://wa.me/5566996611394?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+              
+              return (
+                <div key={p.id} className={`relative border ${theme.border} ${theme.bg} p-6 text-left`}>
+                  <div className={`flex items-center gap-2 mb-2 ${theme.text}`}>
+                    {getPlanoIcon(p.nome)}
+                    <h3 className="font-cinzel text-lg tracking-widest uppercase font-bold">{p.nome}</h3>
+                  </div>
+                  
+                  <p className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider mb-4">
+                    {p.descricao}
+                  </p>
+                  
+                  <div className="space-y-2 mb-6">
+                    {p.servicos_incluidos?.map((s: string, i: number) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-white/80">
+                        <span className={`${theme.text} text-[8px]`}>◆</span>
+                        <span className="uppercase tracking-widest">{s}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-end border-t border-[var(--color-nordik-gold-dim)]/20 pt-4">
+                    <div>
+                      <span className={`text-2xl font-cinzel font-bold ${theme.text}`}>
+                        R$ {Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                      </span>
+                      <span className="text-[10px] text-[var(--color-nordik-gold-dim)] ml-1">/mês</span>
+                    </div>
+                    
+                    <a 
+                      href={linkWhats}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 border ${theme.border} ${theme.text} hover:bg-black transition-colors`}
+                    >
+                      Assinar
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* 5. LOCALIZAÇÃO */}
       <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">

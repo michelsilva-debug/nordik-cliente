@@ -24,6 +24,7 @@ export function Vip() {
   const [loading, setLoading] = useState(true);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
+  const [assinatura, setAssinatura] = useState<any>(null);
   
   // Login State
   const [nome, setNome] = useState('');
@@ -61,6 +62,16 @@ export function Vip() {
       }
       
       setCliente(cData);
+      
+      // 1.5 Busca assinatura ativa do cliente
+      const { data: assData } = await supabase
+        .from('assinaturas')
+        .select('*, planos(*)')
+        .eq('cliente_id', id)
+        .eq('status', 'ativo')
+        .maybeSingle();
+      
+      if (assData) setAssinatura(assData);
       
       // 2. Busca histórico de agendamentos
       const { data: hData } = await supabase
@@ -225,6 +236,51 @@ export function Vip() {
           <LogOut size={18} />
         </button>
       </div>
+
+      {/* Assinatura Ativa */}
+      {assinatura && (
+        <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-6 relative overflow-hidden mb-8 shadow-[0_0_20px_rgba(202,165,101,0.05)]">
+          <div className="flex justify-between items-start mb-4 relative z-10">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Crown size={16} className="text-[var(--color-nordik-gold)]" />
+                <h3 className="font-cinzel text-sm text-[var(--color-nordik-gold-light)] tracking-widest uppercase font-bold">
+                  Sua Assinatura
+                </h3>
+              </div>
+              <h4 className="font-cinzel text-lg text-white tracking-[2px] uppercase">
+                {assinatura.planos?.nome}
+              </h4>
+            </div>
+            <div className="bg-[var(--color-nordik-gold)]/10 border border-[var(--color-nordik-gold)]/30 text-[var(--color-nordik-gold)] px-2 py-1 text-[10px] uppercase tracking-widest font-bold rounded-sm">
+              Ativo
+            </div>
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex justify-between text-xs uppercase tracking-widest mb-2">
+              <span className="text-[var(--color-nordik-gold-dim)]">Visitas no mês</span>
+              <span className="text-[var(--color-nordik-gold)] font-bold">
+                {assinatura.visitas_usadas} / {assinatura.planos?.visitas_mes || 4}
+              </span>
+            </div>
+            
+            <div className="w-full h-1.5 bg-black rounded-full overflow-hidden mb-4">
+              <div 
+                className="h-full bg-[var(--color-nordik-gold)] transition-all duration-1000"
+                style={{ width: `${Math.min((assinatura.visitas_usadas / (assinatura.planos?.visitas_mes || 4)) * 100, 100)}%` }}
+              />
+            </div>
+
+            <div className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-widest flex justify-between">
+              <span>Renova em:</span>
+              <span className="text-[var(--color-nordik-gold-light)]">
+                {format(parseISO(assinatura.data_renovacao), "dd/MM/yyyy")}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Cartão Fidelidade */}
       <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-gold-dark)] p-6 relative overflow-hidden mb-8 shadow-[0_0_30px_rgba(202,165,101,0.1)]">
