@@ -350,7 +350,7 @@ function Home() {
           <div className="flex flex-col gap-6 w-full max-w-sm">
             {planos.map(p => {
               const theme = getPlanoTheme(p.nome);
-              const linkWhats = `https://wa.me/5566996611394?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+              const linkWhats = `https://wa.me/5566996991681?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
               
               return (
                 <div key={p.id} className={`relative border ${theme.border} ${theme.bg} p-6 text-left`}>
