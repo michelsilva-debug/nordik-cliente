@@ -20,7 +20,7 @@ export function Agendamento() {
 
   // Seleções do Usuário
   const [barbeiroSelecionado, setBarbeiroSelecionado] = useState<Barbeiro | null>(null);
-  const [servicoSelecionado, setServicoSelecionado] = useState<Servico | null>(null);
+  const [servicosSelecionados, setServicosSelecionados] = useState<Servico[]>([]);
   const [dataSelecionada, setDataSelecionada] = useState<Date>(startOfToday());
   const [horaSelecionada, setHoraSelecionada] = useState<string | null>(null);
   const [clienteNome, setClienteNome] = useState('');
@@ -64,32 +64,27 @@ export function Agendamento() {
   }, []);
 
   useEffect(() => {
+    const buscarHorariosOcupados = async () => {
+      setLoading(true);
+      const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
+      
+      const { data } = await supabase
+        .from('agenda')
+        .select('horario')
+        .eq('data', dataStr);
+      
+      if (data) {
+        setHorariosOcupados(data.map(d => d.horario.substring(0, 5)));
+      } else {
+        setHorariosOcupados([]);
+      }
+      setLoading(false);
+    };
+
     if (step === 3 && barbeiroSelecionado) {
       buscarHorariosOcupados();
     }
   }, [step, dataSelecionada, barbeiroSelecionado]);
-
-  const buscarHorariosOcupados = async () => {
-    setLoading(true);
-    const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
-    
-    // Busca na agenda do admin os horários marcados para esse barbeiro nessa data
-    // Nota: Aqui o ideal é buscar todos dessa data.
-    const { data } = await supabase
-      .from('agenda')
-      .select('horario')
-      .eq('data', dataStr)
-      // Se não houver barbeiro_id na agenda antiga, isso pode não filtrar perfeitamente,
-      // mas vamos assumir que o painel admin agora salva barbeiro_id (se houver na tabela).
-      // Se não houver, vamos apenas ler a data inteira.
-    
-    if (data) {
-      setHorariosOcupados(data.map(d => d.horario.substring(0, 5)));
-    } else {
-      setHorariosOcupados([]);
-    }
-    setLoading(false);
-  };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -134,6 +129,13 @@ export function Agendamento() {
 
       // 3. Inserir agendamento
       const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
+      
+      const carrinhoParaBanco = servicosSelecionados.map(s => ({
+        id: s.id,
+        nome: s.nome,
+        valor: s.valor
+      }));
+
       const { error: errAgenda } = await supabase
         .from('agenda')
         .insert([{
@@ -141,14 +143,15 @@ export function Agendamento() {
           horario: horaSelecionada,
           cliente_id: clienteId,
           barbeiro_id: barbeiroSelecionado?.id,
-          servico_id: servicoSelecionado?.id
+          servico_id: servicosSelecionados.length > 0 ? servicosSelecionados[0].id : null,
+          carrinho_servicos: carrinhoParaBanco
         }]);
 
       if (errAgenda) throw errAgenda;
 
       // 4. Ir para sucesso
       setStep(5);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError('Ocorreu um erro ao agendar. Tente novamente.');
     } finally {
@@ -156,23 +159,21 @@ export function Agendamento() {
     }
   };
 
-  const HeaderPassos = () => (
-    <div className="flex justify-between items-center mb-8">
-      {step > 1 && step < 5 ? (
-        <button onClick={() => setStep(step - 1)} className="text-[var(--color-nordik-gold-dim)] hover:text-white p-2">
-          <ChevronLeft />
-        </button>
-      ) : <div className="w-10"></div>}
-      <div className="text-[var(--color-nordik-gold)] font-cinzel tracking-widest uppercase text-sm">
-        Passo {step} de 4
-      </div>
-      <div className="w-10"></div>
-    </div>
-  );
-
   return (
     <div className="flex-1 flex flex-col">
-      {step < 5 && <HeaderPassos />}
+      {step < 5 && (
+        <div className="flex justify-between items-center mb-8">
+          {step > 1 && step < 5 ? (
+            <button onClick={() => setStep(step - 1)} className="text-[var(--color-nordik-gold-dim)] hover:text-white p-2">
+              <ChevronLeft />
+            </button>
+          ) : <div className="w-10"></div>}
+          <div className="text-[var(--color-nordik-gold)] font-cinzel tracking-widest uppercase text-sm">
+            Passo {step} de 4
+          </div>
+          <div className="w-10"></div>
+        </div>
+      )}
 
       {/* PASSO 1: BARBEIRO */}
       {step === 1 && (
@@ -201,26 +202,53 @@ export function Agendamento() {
 
       {/* PASSO 2: SERVIÇO */}
       {step === 2 && (
-        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Qual Serviço?</h2>
-          <div className="space-y-3">
-            {servicos.map(s => (
+          <div className="space-y-3 flex-1 overflow-y-auto pb-24">
+            {servicos.map(s => {
+              const isSelected = servicosSelecionados.some(sel => sel.id === s.id);
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    if (isSelected) {
+                      setServicosSelecionados(prev => prev.filter(sel => sel.id !== s.id));
+                    } else {
+                      setServicosSelecionados(prev => [...prev, s]);
+                    }
+                  }}
+                  className={`w-full bg-[var(--color-nordik-panel)] border p-4 flex items-center justify-between transition-colors text-left ${isSelected ? 'border-[var(--color-nordik-gold)]' : 'border-[var(--color-nordik-border)] hover:border-[var(--color-nordik-gold-dim)]'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-sm border flex items-center justify-center transition-colors ${isSelected ? 'bg-[var(--color-nordik-gold)] border-[var(--color-nordik-gold)]' : 'border-[var(--color-nordik-gold-dim)]'}`}>
+                      {isSelected && <CheckCircle2 size={14} className="text-black" />}
+                    </div>
+                    <div>
+                      <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">
+                        {s.nome}
+                        {s.nome_nordik && <span className="text-[10px] text-[var(--color-nordik-gold-dim)] block opacity-80 mt-1">{s.nome_nordik}</span>}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="text-[var(--color-nordik-gold)] font-bold">
+                    R$ {s.valor.toFixed(2)}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
+            <div className="max-w-md mx-auto">
               <button
-                key={s.id}
-                onClick={() => { setServicoSelecionado(s); setStep(3); }}
-                className="w-full bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-4 flex items-center justify-between hover:border-[var(--color-nordik-gold)] transition-colors text-left"
+                disabled={servicosSelecionados.length === 0}
+                onClick={() => setStep(3)}
+                className="w-full bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-4 px-6 flex items-center justify-between transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                <div>
-                  <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">
-                    {s.nome}
-                    {s.nome_nordik && <span className="text-[10px] text-[var(--color-nordik-gold-dim)] block opacity-80 mt-1">{s.nome_nordik}</span>}
-                  </h3>
-                </div>
-                <div className="text-[var(--color-nordik-gold)] font-bold">
-                  R$ {s.valor.toFixed(2)}
-                </div>
+                <span>Continuar</span>
+                <span>R$ {servicosSelecionados.reduce((acc, curr) => acc + curr.valor, 0).toFixed(2)}</span>
               </button>
-            ))}
+            </div>
           </div>
         </div>
       )}
@@ -279,9 +307,17 @@ export function Agendamento() {
           
           <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-6 mb-6 space-y-3">
             <p className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)]">Resumo da Reserva</p>
-            <div className="flex justify-between items-center text-white">
-              <span className="font-bold">{servicoSelecionado?.nome}</span>
-              <span className="text-[var(--color-nordik-gold)]">R$ {servicoSelecionado?.valor.toFixed(2)}</span>
+            <div className="space-y-2 mb-3 pb-3 border-b border-[var(--color-nordik-border)]/50">
+              {servicosSelecionados.map(s => (
+                <div key={s.id} className="flex justify-between items-center text-white text-sm">
+                  <span className="font-bold">{s.nome}</span>
+                  <span className="text-[var(--color-nordik-gold)]">R$ {s.valor.toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center text-white pt-2 font-bold text-lg">
+                <span>Total</span>
+                <span className="text-[var(--color-nordik-gold)]">R$ {servicosSelecionados.reduce((acc, curr) => acc + curr.valor, 0).toFixed(2)}</span>
+              </div>
             </div>
             <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2"><User size={14}/> {barbeiroSelecionado?.nome}</p>
             <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2"><CalendarIcon size={14}/> {format(dataSelecionada, 'dd/MM/yyyy')} às {horaSelecionada}</p>
@@ -344,7 +380,7 @@ export function Agendamento() {
             </p>
             <div className="w-full pt-12 space-y-4">
               <a 
-                href={`https://wa.me/5566996991681?text=Olá Nørdik! Acabei de agendar meu horário para o serviço de ${servicoSelecionado?.nome} no dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
+                href={`https://wa.me/5566996991681?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map(s => s.nome).join(', ')} no dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"

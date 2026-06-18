@@ -68,7 +68,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 // Tela Inicial (Home - Landing Page Premium)
 function Home() {
-  const [planos, setPlanos] = useState<any[]>([]);
+  const [planos, setPlanos] = useState<{ id: string, nome: string, preco: number, descricao: string, servicos_incluidos: string[] }[]>([]);
 
   useEffect(() => {
     async function fetchPlanos() {

@@ -24,16 +24,12 @@ export function Vip() {
   const [loading, setLoading] = useState(true);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
-  const [assinatura, setAssinatura] = useState<any>(null);
+  const [assinatura, setAssinatura] = useState<{ data_renovacao: string, visitas_usadas: number, planos: { nome: string, visitas_mes: number } } | null>(null);
   
   // Login State
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    checkSession();
-  }, []);
 
   const checkSession = async () => {
     const savedId = localStorage.getItem('@nordik:clienteId');
@@ -91,6 +87,14 @@ export function Vip() {
     }
   };
 
+  useEffect(() => {
+    const load = async () => {
+      await checkSession();
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
@@ -139,7 +143,7 @@ export function Vip() {
         localStorage.setItem('@nordik:clienteId', clienteId);
         await fetchClienteData(clienteId);
       }
-    } catch (err) {
+    } catch {
       setError('Ocorreu um erro ao acessar. Tente novamente.');
       setLoading(false);
     }
