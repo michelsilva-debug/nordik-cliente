@@ -177,7 +177,7 @@ export function Agendamento() {
 
       {/* PASSO 1: BARBEIRO */}
       {step === 1 && (
-        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-md mx-auto">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Escolha o Profissional</h2>
           <div className="space-y-3">
             {barbeiros.map(b => (
@@ -202,9 +202,9 @@ export function Agendamento() {
 
       {/* PASSO 2: SERVIÇO */}
       {step === 2 && (
-        <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col">
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col w-full max-w-md mx-auto">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Qual Serviço?</h2>
-          <div className="space-y-3 flex-1 overflow-y-auto pb-24">
+          <div className="space-y-3 flex-1 overflow-y-auto pb-24 w-full">
             {servicos.map(s => {
               const isSelected = servicosSelecionados.some(sel => sel.id === s.id);
               return (
@@ -255,7 +255,7 @@ export function Agendamento() {
 
       {/* PASSO 3: DATA E HORA */}
       {step === 3 && (
-        <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-2xl mx-auto">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Data e Horário</h2>
           
           {/* Seletor de Data Horizontal */}
@@ -277,7 +277,7 @@ export function Agendamento() {
           </div>
 
           {/* Seletor de Hora */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {loading ? (
               <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">Carregando horários...</p>
             ) : (
@@ -302,7 +302,7 @@ export function Agendamento() {
 
       {/* PASSO 4: CONFIRMAÇÃO */}
       {step === 4 && (
-        <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col">
+        <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col w-full max-w-md mx-auto">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Seus Dados</h2>
           
           <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-6 mb-6 space-y-3">

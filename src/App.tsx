@@ -29,23 +29,23 @@ function InstagramIcon({ size = 24 }: { size?: number }) {
 // Layout Base
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col max-w-md mx-auto bg-[var(--color-nordik-bg)] shadow-2xl relative border-x border-[var(--color-nordik-border)]">
-      {/* Header Mobile */}
-      <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6">
+    <div className="min-h-screen flex flex-col w-full max-w-[448px] md:max-w-[900px] lg:max-w-[1200px] mx-auto bg-[var(--color-nordik-bg)] md:shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border-x border-[var(--color-nordik-border)] transition-all duration-500">
+      {/* Header Mobile & Desktop */}
+      <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6 md:px-12">
         <a 
           href="https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute left-6 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors"
+          className="absolute left-6 md:left-12 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors"
           title="Siga no Instagram"
         >
           <InstagramIcon size={24} />
           <span className="text-[8px] font-bold uppercase tracking-widest mt-1">Insta</span>
         </a>
         <Link to="/">
-          <img src="/logo.png" alt="Nordik Barbershop" className="h-20 object-contain" />
+          <img src="/logo.png" alt="Nordik Barbershop" className="h-20 md:h-24 object-contain transition-all duration-500" />
         </Link>
-        <Link to="/vip" className="absolute right-6 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors" title="Acesso VIP">
+        <Link to="/vip" className="absolute right-6 md:right-12 flex flex-col items-center text-[var(--color-nordik-gold)] hover:text-white transition-colors" title="Acesso VIP">
           <Crown size={24} />
           <span className="text-[8px] font-bold uppercase tracking-widest mt-1">Área VIP</span>
         </Link>
@@ -108,16 +108,16 @@ function Home() {
         {/* Gradiente para fundir com a parte de baixo */}
         <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]" />
         
-        <div className="relative z-10 pt-16 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <h1 className="font-cinzel text-xl text-[var(--color-nordik-gold)] tracking-[4px] uppercase mb-2">
+        <div className="relative z-10 pt-16 md:pt-32 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <h1 className="font-cinzel text-xl md:text-4xl text-[var(--color-nordik-gold)] tracking-[4px] md:tracking-[8px] uppercase mb-2 md:mb-4 drop-shadow-xl">
             Nørdik Barbershop
           </h1>
-          <p className="text-xs text-white/70 uppercase tracking-[3px]">
+          <p className="text-xs md:text-sm text-white/70 uppercase tracking-[3px] md:tracking-[5px]">
             Mais que um corte. Um legado.
           </p>
         </div>
 
-        <div className="relative z-10 w-full mb-8 animate-in fade-in zoom-in duration-1000 delay-500 flex flex-col gap-3">
+        <div className="relative z-10 w-full max-w-sm mx-auto md:max-w-md mb-8 animate-in fade-in zoom-in duration-1000 delay-500 flex flex-col gap-3">
           <Link 
             to="/agendar" 
             className="bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-[0_0_20px_rgba(202,165,101,0.3)]"
@@ -163,9 +163,9 @@ function Home() {
           Nosso Objetivo
         </h2>
         
-        <div className="space-y-8 max-w-sm mx-auto">
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1">
+        <div className="space-y-8 max-w-sm mx-auto md:max-w-5xl md:grid md:grid-cols-3 md:gap-8 md:space-y-0">
+          <div className="flex flex-col md:items-center md:text-center gap-4">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
               <span className="text-[var(--color-nordik-gold)] text-lg">⚔️</span>
             </div>
             <div>
@@ -176,8 +176,8 @@ function Home() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1">
+          <div className="flex flex-col md:items-center md:text-center gap-4">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
               <span className="text-[var(--color-nordik-gold)] text-lg">🛡️</span>
             </div>
             <div>
@@ -188,8 +188,8 @@ function Home() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1">
+          <div className="flex flex-col md:items-center md:text-center gap-4">
+            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
               <span className="text-[var(--color-nordik-gold)] text-lg">🤝</span>
             </div>
             <div>
@@ -213,7 +213,7 @@ function Home() {
           <p>Cada detalhe pensado para proporcionar uma experiência única e memorável.</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-y-10 gap-x-4 w-full max-w-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-12 w-full max-w-sm md:max-w-4xl">
           <div className="flex flex-col items-center gap-3">
             <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center text-[var(--color-nordik-gold)] bg-black/50">
               <span className="text-2xl font-cinzel">N</span>
@@ -248,9 +248,9 @@ function Home() {
         </h2>
         <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">O Nosso Diferencial</p>
         
-        <div className="space-y-6 max-w-sm mx-auto">
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+        <div className="space-y-6 max-w-sm mx-auto md:max-w-4xl md:grid md:grid-cols-2 md:gap-x-16 md:gap-y-10 md:space-y-0">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
               <span className="text-[var(--color-nordik-gold)] text-lg">✨</span>
             </div>
             <div>
@@ -261,8 +261,8 @@ function Home() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
               <span className="text-[var(--color-nordik-gold)] text-lg">💆‍♂️</span>
             </div>
             <div>
@@ -273,8 +273,8 @@ function Home() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
               <span className="text-[var(--color-nordik-gold)] text-lg">💨</span>
             </div>
             <div>
@@ -285,8 +285,8 @@ function Home() {
             </div>
           </div>
 
-          <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 bg-black">
+          <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+            <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
               <span className="text-[var(--color-nordik-gold)] text-lg">♨️</span>
             </div>
             <div>
@@ -310,7 +310,7 @@ function Home() {
           <p>Sua experiência completa. Desfrute de uma bebida gelada enquanto cuidamos do seu visual.</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-y-10 gap-x-4 w-full max-w-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-8 w-full max-w-sm md:max-w-4xl">
           <div className="flex flex-col items-center gap-2">
             <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
               <span className="text-2xl">🍺</span>
@@ -358,7 +358,7 @@ function Home() {
             Pague 3, Leve 4 cortes no mês
           </p>
 
-          <div className="flex flex-col gap-6 w-full max-w-sm">
+          <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full max-w-sm md:max-w-5xl mx-auto">
             {planos.map(p => {
               const theme = getPlanoTheme(p.nome);
               const linkWhats = `https://wa.me/5566996991681?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;

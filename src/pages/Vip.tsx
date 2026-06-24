@@ -165,7 +165,7 @@ export function Vip() {
   // TELA DE LOGIN VIP
   if (!cliente) {
     return (
-      <div className="flex-1 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="flex-1 flex flex-col justify-center animate-in fade-in zoom-in-95 duration-500 w-full max-w-md mx-auto">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-[var(--color-nordik-gold-dark)] rounded-full flex items-center justify-center text-black mx-auto mb-4 shadow-[0_0_30px_rgba(202,165,101,0.3)]">
             <Crown size={32} />
@@ -224,7 +224,7 @@ export function Vip() {
   const selosExibidos = isPremiado ? 10 : selosPreenchidos;
 
   return (
-    <div className="flex-1 flex flex-col -mx-6 px-6 pb-6 pt-4 animate-in fade-in duration-500">
+    <div className="flex-1 flex flex-col -mx-6 md:-mx-0 px-6 md:px-0 pb-6 pt-4 animate-in fade-in duration-500 w-full max-w-2xl mx-auto">
       
       {/* Header VIP */}
       <div className="flex justify-between items-center mb-8 border-b border-[var(--color-nordik-border)] pb-4">
