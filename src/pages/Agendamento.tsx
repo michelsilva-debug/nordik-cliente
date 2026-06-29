@@ -148,6 +148,10 @@ export function Agendamento() {
         }]);
 
       if (errAgenda) throw errAgenda;
+      // Dispara o evento de Conversão para o Pixel do Facebook
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Schedule');
+      }
 
       // 4. Ir para sucesso
       setStep(5);
