@@ -16,7 +16,7 @@ interface Agendamento {
   data: string;
   horario: string;
   status: string;
-  servicos?: { nome: string };
+  servicos?: { nome: string; duracao_min?: number };
   barbeiros?: { nome: string };
 }
 
@@ -357,6 +357,18 @@ export function Vip() {
                   <div className="text-white font-bold text-sm mb-1">{h.servicos?.nome || 'Serviço Padrão'}</div>
                   <div className="text-[var(--color-nordik-gold-dim)] text-[10px] uppercase tracking-widest">
                     {format(parseISO(h.data), "dd 'de' MMM", { locale: ptBR })} • {h.barbeiros?.nome}
+                  </div>
+                  <div className={`text-[10px] uppercase tracking-widest mt-1 font-bold ${h.servicos?.duracao_min && h.servicos.duracao_min >= 60 ? 'text-[#FFD700] bg-[#FFD700]/10 px-2 py-0.5 rounded-sm inline-block' : 'text-[var(--color-nordik-gold)]'}`}>
+                    {(() => {
+                      if (!h.horario) return '';
+                      const duracao = h.servicos?.duracao_min || 30;
+                      const [horas, min] = h.horario.split(':').map(Number);
+                      const dataFalsa = new Date();
+                      dataFalsa.setHours(horas, min, 0, 0);
+                      const endDate = new Date(dataFalsa.getTime() + duracao * 60000);
+                      const endHorario = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+                      return `⏱ ${h.horario.substring(0, 5)} → ${endHorario}`;
+                    })()}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

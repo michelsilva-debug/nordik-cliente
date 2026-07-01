@@ -5,7 +5,7 @@ import { format, addDays, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface Barbeiro { id: string; nome: string; }
-interface Servico { id: string; nome: string; nome_nordik: string | null; valor: number; }
+interface Servico { id: string; nome: string; nome_nordik: string | null; valor: number; duracao_min?: number; }
 interface HorarioDisponivel { hora: string; disponivel: boolean; }
 
 export function Agendamento() {
@@ -29,24 +29,30 @@ export function Agendamento() {
   // Geração de dias (próximos 30 dias)
   const diasDisponiveis = Array.from({ length: 30 }).map((_, i) => addDays(startOfToday(), i));
 
-  // Geração de horários (08:00 as 19:15, a cada 45 min)
+  const calcularDuracaoTotal = () => {
+    if (servicosSelecionados.length === 0) return 30;
+    const soma = servicosSelecionados.reduce((acc, curr) => acc + (curr.duracao_min || 30), 0);
+    return Math.max(soma, 30);
+  };
+
+  // Geração de horários (08:00 as 19:30, a cada 30 min)
   const gerarHorariosBase = (): HorarioDisponivel[] => {
     const horarios: HorarioDisponivel[] = [];
     let h = 8;
     let m = 0;
     
-    // Gera horários até as 19:15 (último horário)
+    // Gera horários até as 19:30 (último horário)
     while (h < 20) {
       horarios.push({ 
         hora: `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`, 
         disponivel: true 
       });
-      m += 45;
+      m += 30;
       if (m >= 60) {
         h += 1;
         m -= 60;
       }
-      if (h > 19 || (h === 19 && m > 15)) break; // Limite de encerramento
+      if (h > 19 || (h === 19 && m > 30)) break; // Limite de encerramento
     }
     return horarios;
   };
@@ -56,7 +62,7 @@ export function Agendamento() {
       const { data: bData } = await supabase.from('barbeiros').select('id, nome').order('nome');
       if (bData) setBarbeiros(bData);
       
-      const { data: sData, error: sErr } = await supabase.from('servicos').select('id, nome, nome_nordik, valor').eq('ativo', true).order('nome');
+      const { data: sData, error: sErr } = await supabase.from('servicos').select('id, nome, nome_nordik, valor, duracao_min').eq('ativo', true).order('nome');
       if (sErr) console.error('Erro ao buscar servicos:', sErr);
       if (sData) setServicos(sData);
     }
@@ -260,7 +266,13 @@ export function Agendamento() {
       {/* PASSO 3: DATA E HORA */}
       {step === 3 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-2xl mx-auto">
-          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Data e Horário</h2>
+          <h2 className="text-xl text-white mb-2 font-cinzel tracking-widest text-center">Data e Horário</h2>
+          
+          <div className="flex justify-center mb-6">
+            <span className="text-[10px] bg-[var(--color-nordik-gold-dark)]/10 text-[var(--color-nordik-gold)] border border-[var(--color-nordik-gold)]/20 px-3 py-1.5 rounded-full uppercase tracking-widest font-bold">
+              ⏱ Duração estimada: {calcularDuracaoTotal()} minutos
+            </span>
+          </div>
           
           {/* Seletor de Data Horizontal */}
           <div className="flex overflow-x-auto gap-3 pb-4 mb-6 snap-x hide-scrollbar">
@@ -284,9 +296,27 @@ export function Agendamento() {
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {loading ? (
               <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">Carregando horários...</p>
-            ) : (
-              gerarHorariosBase().map(h => {
-                const ocupado = horariosOcupados.includes(h.hora);
+            ) : (() => {
+              const horariosBase = gerarHorariosBase();
+              const duracaoTotal = calcularDuracaoTotal();
+              const slotsNecessarios = Math.ceil(duracaoTotal / 30);
+              
+              return horariosBase.map((h, index) => {
+                let ocupado = false;
+                // Verifica se este slot ou os slots seguintes necessários estão ocupados
+                for (let i = 0; i < slotsNecessarios; i++) {
+                  const slotIndex = index + i;
+                  // Se passar do último horário gerado, significa que não dá tempo
+                  if (slotIndex >= horariosBase.length) {
+                    ocupado = true;
+                    break;
+                  }
+                  if (horariosOcupados.includes(horariosBase[slotIndex].hora)) {
+                    ocupado = true;
+                    break;
+                  }
+                }
+                
                 const selecionado = horaSelecionada === h.hora;
                 return (
                   <button
@@ -299,7 +329,7 @@ export function Agendamento() {
                   </button>
                 )
               })
-            )}
+            })()}
           </div>
         </div>
       )}
