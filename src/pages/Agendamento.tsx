@@ -74,13 +74,32 @@ export function Agendamento() {
       setLoading(true);
       const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
       
-      const { data } = await supabase
+      const { data: dataAgenda } = await supabase
         .from('agenda')
-        .select('horario')
+        .select('horario, servicos(duracao_min)')
         .eq('data', dataStr);
       
-      if (data) {
-        setHorariosOcupados(data.map(d => d.horario.substring(0, 5)));
+      if (dataAgenda) {
+        const blocosOcupados = new Set<string>();
+        dataAgenda.forEach(d => {
+          if (!d.horario) return;
+          const horaBase = d.horario.substring(0, 5);
+          blocosOcupados.add(horaBase);
+          
+          // @ts-ignore
+          const duracao = d.servicos?.duracao_min || 30;
+          if (duracao > 30) {
+             const slotsExtras = Math.ceil(duracao / 30) - 1;
+             let [h, m] = horaBase.split(':').map(Number);
+             for(let i = 1; i <= slotsExtras; i++) {
+               m += 30;
+               if (m >= 60) { h += 1; m -= 60; }
+               const extraHora = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+               blocosOcupados.add(extraHora);
+             }
+          }
+        });
+        setHorariosOcupados(Array.from(blocosOcupados));
       } else {
         setHorariosOcupados([]);
       }
@@ -290,9 +309,24 @@ export function Agendamento() {
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {loading ? (
               <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">Carregando horários...</p>
-            ) : (
-              gerarHorariosBase().map(h => {
-                const ocupado = horariosOcupados.includes(h.hora);
+            ) : (() => {
+              const horariosBase = gerarHorariosBase();
+              const duracaoTotal = calcularDuracaoTotal();
+              const slotsNecessarios = Math.ceil(duracaoTotal / 30);
+              
+              return horariosBase.map((h, index) => {
+                let ocupado = false;
+                // Verifica se este slot ou os slots seguintes necessários estão ocupados
+                for (let i = 0; i < slotsNecessarios; i++) {
+                  const slotIndex = index + i;
+                  if (slotIndex < horariosBase.length) {
+                    if (horariosOcupados.includes(horariosBase[slotIndex].hora)) {
+                      ocupado = true;
+                      break;
+                    }
+                  }
+                }
+                
                 const selecionado = horaSelecionada === h.hora;
                 return (
                   <button
@@ -305,7 +339,7 @@ export function Agendamento() {
                   </button>
                 )
               })
-            )}
+            })()}
           </div>
         </div>
       )}
