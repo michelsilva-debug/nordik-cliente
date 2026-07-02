@@ -266,13 +266,7 @@ export function Agendamento() {
       {/* PASSO 3: DATA E HORA */}
       {step === 3 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-2xl mx-auto">
-          <h2 className="text-xl text-white mb-2 font-cinzel tracking-widest text-center">Data e Horário</h2>
-          
-          <div className="flex justify-center mb-6">
-            <span className="text-[10px] bg-[var(--color-nordik-gold-dark)]/10 text-[var(--color-nordik-gold)] border border-[var(--color-nordik-gold)]/20 px-3 py-1.5 rounded-full uppercase tracking-widest font-bold">
-              ⏱ Duração estimada: {calcularDuracaoTotal()} minutos
-            </span>
-          </div>
+          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Data e Horário</h2>
           
           {/* Seletor de Data Horizontal */}
           <div className="flex overflow-x-auto gap-3 pb-4 mb-6 snap-x hide-scrollbar">
@@ -296,27 +290,9 @@ export function Agendamento() {
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {loading ? (
               <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">Carregando horários...</p>
-            ) : (() => {
-              const horariosBase = gerarHorariosBase();
-              const duracaoTotal = calcularDuracaoTotal();
-              const slotsNecessarios = Math.ceil(duracaoTotal / 30);
-              
-              return horariosBase.map((h, index) => {
-                let ocupado = false;
-                // Verifica se este slot ou os slots seguintes necessários estão ocupados
-                for (let i = 0; i < slotsNecessarios; i++) {
-                  const slotIndex = index + i;
-                  // Se passar do último horário gerado, significa que não dá tempo
-                  if (slotIndex >= horariosBase.length) {
-                    ocupado = true;
-                    break;
-                  }
-                  if (horariosOcupados.includes(horariosBase[slotIndex].hora)) {
-                    ocupado = true;
-                    break;
-                  }
-                }
-                
+            ) : (
+              gerarHorariosBase().map(h => {
+                const ocupado = horariosOcupados.includes(h.hora);
                 const selecionado = horaSelecionada === h.hora;
                 return (
                   <button
@@ -329,7 +305,7 @@ export function Agendamento() {
                   </button>
                 )
               })
-            })()}
+            )}
           </div>
         </div>
       )}
