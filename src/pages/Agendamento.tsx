@@ -424,7 +424,7 @@ export function Agendamento() {
             </p>
             <div className="w-full pt-12 space-y-4">
               <a 
-                href={`https://wa.me/5566996991681?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map(s => s.nome).join(', ')} no dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
+                href={`https://wa.me/5566999888986?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map(s => s.nome).join(', ')} no dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
