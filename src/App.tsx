@@ -29,9 +29,15 @@ function InstagramIcon({ size = 24 }: { size?: number }) {
 // Layout Base
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col w-full max-w-[448px] md:max-w-[900px] lg:max-w-[1200px] mx-auto bg-[var(--color-nordik-bg)] md:shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border-x border-[var(--color-nordik-border)] transition-all duration-500">
+    <div className="min-h-screen flex flex-col w-full max-w-[448px] md:max-w-[900px] lg:max-w-[1200px] mx-auto bg-black md:shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border-x border-[var(--color-nordik-border)] transition-all duration-500 overflow-hidden">
+      {/* Marca d'água nórdica — padrão repetido sutil */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.12] pointer-events-none"
+        style={{ backgroundImage: "url('/nordic-watermark.png')", backgroundSize: '400px', backgroundRepeat: 'repeat' }}
+      />
+
       {/* Header Mobile & Desktop */}
-      <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6 md:px-12">
+      <header className="h-32 flex justify-center items-center border-b border-[var(--color-nordik-gold-dark)] relative px-6 md:px-12 z-10">
         <a 
           href="https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7"
           target="_blank"
@@ -52,12 +58,12 @@ function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Conteúdo Dinâmico */}
-      <main className="flex-1 p-6 flex flex-col">
+      <main className="flex-1 p-6 flex flex-col z-10 relative">
         {children}
       </main>
 
       {/* Footer Minimalista */}
-      <footer className="py-6 text-center border-t border-[var(--color-nordik-border)] bg-[#050505]">
+      <footer className="py-6 text-center border-t border-[var(--color-nordik-border)] bg-[#050505] z-10 relative">
         <p className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dimmer)]">
           &copy; {new Date().getFullYear()} NØRDIK BARBERSHOP
         </p>
@@ -100,7 +106,7 @@ function Home() {
     <div className="flex-1 flex flex-col -m-6 pb-12 bg-[#050505]">
       {/* 1. HERO SECTION */}
       <section className="relative w-full h-[85vh] flex flex-col justify-between items-center text-center p-8 bg-black">
-        {/* Fundo com a imagem gerada */}
+        {/* Como o layout já tem fundo, podemos remover a imagem fixa daqui ou deixar ela mais forte apenas no Hero */}
         <div 
           className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
           style={{ backgroundImage: "url('/bg-premium.png')" }}

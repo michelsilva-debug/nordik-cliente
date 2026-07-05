@@ -26,8 +26,8 @@ export function Agendamento() {
   const [clienteNome, setClienteNome] = useState('');
   const [clienteTelefone, setClienteTelefone] = useState('');
 
-  // Geração de dias (próximos 30 dias)
-  const diasDisponiveis = Array.from({ length: 30 }).map((_, i) => addDays(startOfToday(), i));
+  // Geração de dias (próximos 30 dias úteis — sem domingos)
+  const diasDisponiveis = Array.from({ length: 30 }).map((_, i) => addDays(startOfToday(), i)).filter(d => d.getDay() !== 0);
 
   const calcularDuracaoTotal = () => {
     if (servicosSelecionados.length === 0) return 30;
