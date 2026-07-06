@@ -436,7 +436,7 @@ function Home() {
                   Club Nørdik
                 </h2>
                 <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
-                  Pague 2, 3º pela Metade
+                  Combo Valhalla — 2 Cortes + 3º com 50% OFF
                 </p>
 
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full">
