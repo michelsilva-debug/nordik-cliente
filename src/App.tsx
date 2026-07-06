@@ -74,7 +74,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 // Tela Inicial (Home - Landing Page Premium)
 function Home() {
-  const [planos, setPlanos] = useState<{ id: string, nome: string, preco: number, descricao: string, servicos_incluidos: string[] }[]>([]);
+  const [planos, setPlanos] = useState<{ id: string, nome: string, preco: number, descricao: string, servicos_incluidos: string[], visitas_mes: number }[]>([]);
 
   useEffect(() => {
     async function fetchPlanos() {
@@ -352,66 +352,102 @@ function Home() {
       </section>
 
       {/* 4.7 PLANOS MENSAIS */}
-      {planos.length > 0 && (
-        <section id="planos" className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20 scroll-mt-6">
-          <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)]">
-            <Crown size={28} />
-          </div>
-          <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
-            Club Nørdik
-          </h2>
-          <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
-            Pague 3, Leve 4 cortes no mês
-          </p>
+      {planos.length > 0 && (() => {
+        const planosPague3Leve4 = planos.filter(p => p.visitas_mes === 4);
+        const planosPague2Metade = planos.filter(p => p.visitas_mes !== 4);
 
-          <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full max-w-sm md:max-w-5xl mx-auto">
-            {planos.map(p => {
-              const theme = getPlanoTheme(p.nome);
-              const linkWhats = `https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+        const renderPlanoCard = (p: typeof planos[0]) => {
+          const theme = getPlanoTheme(p.nome);
+          const linkWhats = `https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+          
+          return (
+            <div key={p.id} className={`relative border ${theme.border} ${theme.bg} p-6 text-left`}>
+              <div className={`flex items-center gap-2 mb-2 ${theme.text}`}>
+                {getPlanoIcon(p.nome)}
+                <h3 className="font-cinzel text-lg tracking-widest uppercase font-bold">{p.nome}</h3>
+              </div>
               
-              return (
-                <div key={p.id} className={`relative border ${theme.border} ${theme.bg} p-6 text-left`}>
-                  <div className={`flex items-center gap-2 mb-2 ${theme.text}`}>
-                    {getPlanoIcon(p.nome)}
-                    <h3 className="font-cinzel text-lg tracking-widest uppercase font-bold">{p.nome}</h3>
+              <p className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider mb-4">
+                {p.descricao}
+              </p>
+              
+              <div className="space-y-2 mb-6">
+                {p.servicos_incluidos?.map((s: string, i: number) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-white/80">
+                    <span className={`${theme.text} text-[8px]`}>◆</span>
+                    <span className="uppercase tracking-widest">{s}</span>
                   </div>
-                  
-                  <p className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider mb-4">
-                    {p.descricao}
-                  </p>
-                  
-                  <div className="space-y-2 mb-6">
-                    {p.servicos_incluidos?.map((s: string, i: number) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-white/80">
-                        <span className={`${theme.text} text-[8px]`}>◆</span>
-                        <span className="uppercase tracking-widest">{s}</span>
-                      </div>
-                    ))}
-                  </div>
+                ))}
+              </div>
 
-                  <div className="flex justify-between items-end border-t border-[var(--color-nordik-gold-dim)]/20 pt-4">
-                    <div>
-                      <span className={`text-2xl font-cinzel font-bold ${theme.text}`}>
-                        R$ {Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-                      </span>
-                      <span className="text-[10px] text-[var(--color-nordik-gold-dim)] ml-1">/mês</span>
-                    </div>
-                    
-                    <a 
-                      href={linkWhats}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 border ${theme.border} ${theme.text} hover:bg-black transition-colors`}
-                    >
-                      Assinar
-                    </a>
-                  </div>
+              <div className="flex justify-between items-end border-t border-[var(--color-nordik-gold-dim)]/20 pt-4">
+                <div>
+                  <span className={`text-2xl font-cinzel font-bold ${theme.text}`}>
+                    R$ {Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                  </span>
+                  <span className="text-[10px] text-[var(--color-nordik-gold-dim)] ml-1">/mês</span>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                
+                <a 
+                  href={linkWhats}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-[10px] uppercase tracking-widest font-bold px-4 py-2 border ${theme.border} ${theme.text} hover:bg-black transition-colors`}
+                >
+                  Assinar
+                </a>
+              </div>
+            </div>
+          );
+        };
+
+        return (
+          <section id="planos" className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20 scroll-mt-6">
+            
+            {/* COMBO 1: Pague 3, Leve 4 */}
+            {planosPague3Leve4.length > 0 && (
+              <div className="w-full max-w-sm md:max-w-5xl mx-auto mb-16">
+                <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)] justify-center">
+                  <Crown size={28} />
+                </div>
+                <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+                  Club Nørdik
+                </h2>
+                <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
+                  Pague 3, Leve 4 cortes no mês
+                </p>
+
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full">
+                  {planosPague3Leve4.map(renderPlanoCard)}
+                </div>
+              </div>
+            )}
+
+            {/* COMBO 2: Pague 2, 3º pela Metade */}
+            {planosPague2Metade.length > 0 && (
+              <div className="w-full max-w-sm md:max-w-5xl mx-auto">
+                {planosPague3Leve4.length > 0 && (
+                  <div className="border-t border-[var(--color-nordik-gold-dim)]/20 mb-12" />
+                )}
+                <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)] justify-center">
+                  <Crown size={28} />
+                </div>
+                <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+                  Club Nørdik
+                </h2>
+                <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
+                  Pague 2, 3º pela Metade
+                </p>
+
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full">
+                  {planosPague2Metade.map(renderPlanoCard)}
+                </div>
+              </div>
+            )}
+
+          </section>
+        );
+      })()}
 
       {/* 5. LOCALIZAÇÃO */}
       <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
