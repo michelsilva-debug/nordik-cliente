@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Crown, Shield, Sword, ChevronDown } from 'lucide-react';
+import { CalendarDays, MapPin, Crown, Shield, Sword, ChevronDown, MessageCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import { Agendamento } from './pages/Agendamento';
@@ -132,10 +132,31 @@ function Home() {
             Agendar Horário
           </Link>
 
+          <div className="grid grid-cols-2 gap-3">
+            <a 
+              href="https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366]/10 hover:border-[#25D366] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
+            >
+              <MessageCircle size={16} />
+              WhatsApp
+            </a>
+            <a 
+              href="https://maps.google.com/?q=R.+Astorga,+244+-+Módulo+05,+Juína+-+MT" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold-dim)]/10 hover:border-[var(--color-nordik-gold)] hover:text-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
+            >
+              <MapPin size={16} />
+              Localização
+            </a>
+          </div>
+
           {planos.length > 0 && (
             <button 
               onClick={() => document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] hover:border-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-4 px-6 w-full flex items-center justify-center gap-3 transition-colors"
+              className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] hover:border-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-4 px-6 w-full flex items-center justify-center gap-3 transition-colors mt-1"
             >
               <Crown size={18} />
               Ver Planos Mensais
