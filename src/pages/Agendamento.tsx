@@ -344,7 +344,7 @@ export function Agendamento() {
                 onClick={() => setShowPmModal(true)}
                 className="w-full bg-black border border-[var(--color-nordik-gold-dim)]/30 p-4 mt-6 flex items-center justify-center gap-2 hover:border-[var(--color-nordik-gold)]/60 transition-colors"
               >
-                <span className="text-[var(--color-nordik-gold)]">🛡️</span>
+                <span className="text-[var(--color-nordik-gold)] text-lg">🚓</span>
                 <span className="text-[10px] text-[var(--color-nordik-gold-light)] uppercase tracking-widest font-bold">Sou Policial Militar / Ativar Convênio</span>
               </button>
             )}
