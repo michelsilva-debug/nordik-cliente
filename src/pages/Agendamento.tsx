@@ -5,13 +5,21 @@ import { format, addDays, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface Barbeiro { id: string; nome: string; }
-interface Servico { id: string; nome: string; nome_nordik: string | null; valor: number; duracao_min?: number; }
+interface Servico { id: string; nome: string; nome_nordik: string | null; valor: number; duracao_min?: number; exclusivo_pm?: boolean; }
 interface HorarioDisponivel { hora: string; disponivel: boolean; }
 
 export function Agendamento() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Estados do Convênio PM
+  const [isPmValido, setIsPmValido] = useState(false);
+  const [showPmModal, setShowPmModal] = useState(false);
+  const [pmTelefone, setPmTelefone] = useState('');
+  const [pmMatricula, setPmMatricula] = useState('');
+  const [pmLoading, setPmLoading] = useState(false);
+  const [pmMsg, setPmMsg] = useState({ type: '', text: '' });
 
   // Dados do DB
   const [barbeiros, setBarbeiros] = useState<Barbeiro[]>([]);
@@ -62,9 +70,18 @@ export function Agendamento() {
       const { data: bData } = await supabase.from('barbeiros').select('id, nome').order('nome');
       if (bData) setBarbeiros(bData);
       
-      const { data: sData, error: sErr } = await supabase.from('servicos').select('id, nome, nome_nordik, valor, duracao_min').eq('ativo', true).order('nome');
+      const { data: sData, error: sErr } = await supabase.from('servicos').select('id, nome, nome_nordik, valor, duracao_min, exclusivo_pm').eq('ativo', true).order('nome');
       if (sErr) console.error('Erro ao buscar servicos:', sErr);
       if (sData) setServicos(sData);
+
+      // Verificação automática do PM via localStorage
+      const savedPmPhone = localStorage.getItem('nordik_pm_phone');
+      if (savedPmPhone) {
+        const { data: pmData } = await supabase.from('clientes').select('pm_status').eq('telefone', savedPmPhone).limit(1);
+        if (pmData && pmData.length > 0 && pmData[0].pm_status === 'aprovado') {
+          setIsPmValido(true);
+        }
+      }
     }
     fetchIniciais();
   }, []);
@@ -117,6 +134,61 @@ export function Agendamento() {
     if (value.length > 2) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
     if (value.length > 9) value = `${value.slice(0, 10)}-${value.slice(10)}`;
     setClienteTelefone(value);
+  };
+
+  const handlePmTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    if (value.length > 2) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+    if (value.length > 9) value = `${value.slice(0, 10)}-${value.slice(10)}`;
+    setPmTelefone(value);
+  };
+
+  const handlePmSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pmTelefone.length < 14) {
+      setPmMsg({ type: 'error', text: 'Preencha o telefone corretamente.' });
+      return;
+    }
+    
+    setPmLoading(true);
+    setPmMsg({ type: '', text: '' });
+    
+    try {
+      const { data } = await supabase.from('clientes').select('id, pm_status').eq('telefone', pmTelefone).limit(1);
+      
+      if (data && data.length > 0) {
+        const cliente = data[0];
+        if (cliente.pm_status === 'aprovado') {
+          setIsPmValido(true);
+          setShowPmModal(false);
+          localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
+        } else if (cliente.pm_status === 'pendente') {
+          setPmMsg({ type: 'warning', text: 'Sua matrícula já está em análise! Agende um corte normal e apresente a funcional na barbearia para aprovação.' });
+        } else {
+          if (!pmMatricula) {
+            setPmMsg({ type: 'error', text: 'Para o primeiro acesso, a matrícula é obrigatória.' });
+            setPmLoading(false);
+            return;
+          }
+          await supabase.from('clientes').update({ pm_matricula: pmMatricula, pm_status: 'pendente' }).eq('id', cliente.id);
+          setPmMsg({ type: 'success', text: 'Matrícula recebida! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.' });
+          localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
+        }
+      } else {
+        if (!pmMatricula) {
+          setPmMsg({ type: 'error', text: 'Para o primeiro acesso, a matrícula é obrigatória.' });
+          setPmLoading(false);
+          return;
+        }
+        await supabase.from('clientes').insert([{ telefone: pmTelefone, nome: 'PM ' + pmMatricula, pm_matricula: pmMatricula, pm_status: 'pendente', pontos_fidelidade: 0 }]);
+        setPmMsg({ type: 'success', text: 'Cadastro criado! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.' });
+        localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
+      }
+    } catch (err) {
+      setPmMsg({ type: 'error', text: 'Erro de conexão. Tente novamente.' });
+    }
+    setPmLoading(false);
   };
 
   const confirmarAgendamento = async () => {
@@ -234,7 +306,7 @@ export function Agendamento() {
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col w-full max-w-md mx-auto">
           <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Qual Serviço?</h2>
           <div className="space-y-3 flex-1 overflow-y-auto pb-24 w-full">
-            {servicos.map(s => {
+            {servicos.filter(s => !s.exclusivo_pm || isPmValido).map(s => {
               const isSelected = servicosSelecionados.some(sel => sel.id === s.id);
               return (
                 <button
@@ -265,6 +337,17 @@ export function Agendamento() {
                 </button>
               );
             })}
+            
+            {/* Botão Convênio PM */}
+            {!isPmValido && (
+              <button 
+                onClick={() => setShowPmModal(true)}
+                className="w-full bg-black border border-[var(--color-nordik-gold-dim)]/30 p-4 mt-6 flex items-center justify-center gap-2 hover:border-[var(--color-nordik-gold)]/60 transition-colors"
+              >
+                <span className="text-[var(--color-nordik-gold)]">🛡️</span>
+                <span className="text-[10px] text-[var(--color-nordik-gold-light)] uppercase tracking-widest font-bold">Sou Policial Militar / Ativar Convênio</span>
+              </button>
+            )}
           </div>
 
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
@@ -441,6 +524,66 @@ export function Agendamento() {
           </div>
         </div>
       )}
+      
+      {/* Modal PM */}
+      {showPmModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6">
+          <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] w-full max-w-sm p-6 relative animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowPmModal(false)}
+              className="absolute top-4 right-4 text-[var(--color-nordik-gold-dim)] hover:text-white"
+            >
+              ✕
+            </button>
+            <h3 className="text-[var(--color-nordik-gold)] font-cinzel text-lg uppercase tracking-widest mb-2 text-center">Convênio PM</h3>
+            <p className="text-white/70 text-xs text-center mb-6 leading-relaxed">
+              Informe seus dados para validar o acesso ao Plano NØRDIK exclusivo para policiais militares.
+            </p>
+            
+            <form onSubmit={handlePmSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Seu WhatsApp</label>
+                <input
+                  type="tel"
+                  value={pmTelefone}
+                  onChange={handlePmTelefoneChange}
+                  placeholder="(00) 00000-0000"
+                  className="w-full bg-black border border-[var(--color-nordik-border)] px-4 py-3 text-white focus:border-[var(--color-nordik-gold)] focus:outline-none transition-colors text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Matrícula / Funcional <span className="text-white/40">(Apenas 1º acesso)</span></label>
+                <input
+                  type="text"
+                  value={pmMatricula}
+                  onChange={e => setPmMatricula(e.target.value)}
+                  placeholder="Deixe em branco se já validou antes"
+                  className="w-full bg-black border border-[var(--color-nordik-border)] px-4 py-3 text-white focus:border-[var(--color-nordik-gold)] focus:outline-none transition-colors text-sm"
+                />
+              </div>
+              
+              {pmMsg.text && (
+                <div className={`p-3 text-xs border leading-relaxed ${
+                  pmMsg.type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                  pmMsg.type === 'success' ? 'bg-[#25D366]/10 border-[#25D366]/30 text-[#25D366]' :
+                  'bg-yellow-500/10 border-yellow-500/30 text-yellow-500'
+                }`}>
+                  {pmMsg.text}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={pmLoading}
+                className="mt-4 bg-transparent border border-[var(--color-nordik-gold)] text-[var(--color-nordik-gold)] hover:bg-[var(--color-nordik-gold)] hover:text-black font-bold uppercase tracking-widest py-3 px-6 w-full flex items-center justify-center transition-colors disabled:opacity-50 text-xs"
+              >
+                {pmLoading ? 'Verificando...' : 'Validar Acesso'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
