@@ -343,7 +343,7 @@ function Home() {
               <span className="text-2xl">🍺</span>
             </div>
             <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">Cervejas Premium</span>
-            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Heineken • Eisenbahn • Patagonia</span>
+            <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">Heineken • Corona • Império Gold</span>
           </div>
           
           <div className="flex flex-col items-center gap-2">
@@ -374,12 +374,30 @@ function Home() {
 
       {/* 4.7 PLANOS MENSAIS */}
       {planos.length > 0 && (() => {
-        const planosPague3Leve4 = planos.filter(p => p.visitas_mes === 4);
-        const planosPague2Metade = planos.filter(p => p.visitas_mes !== 4);
+        const planoComboCabelo = planos.filter(p => p.nome.toUpperCase().includes('BLACK'));
+        const planosPague3Leve4 = planos.filter(p => p.visitas_mes === 4 && !p.nome.toUpperCase().includes('BLACK'));
+        const planosPague2Metade = planos.filter(p => p.visitas_mes !== 4 && !p.nome.toUpperCase().includes('BLACK'));
 
         const renderPlanoCard = (p: typeof planos[0]) => {
           const theme = getPlanoTheme(p.nome);
           const linkWhats = `https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+          
+          const isComboCabelo = p.nome.toUpperCase().includes('BLACK');
+          let valorReal = 0;
+          let showDiscount = false;
+
+          if (isComboCabelo) {
+            valorReal = 180;
+            showDiscount = true;
+          } else if (p.visitas_mes === 4) {
+            // Pague 3, Leve 4: o preço do plano equivale a 3 visitas
+            valorReal = (p.preco / 3) * 4;
+            showDiscount = true;
+          } else if (p.visitas_mes === 3) {
+            // Pague 2 e 3º pela metade: o preço do plano equivale a 2.5 visitas
+            valorReal = (p.preco / 2.5) * 3;
+            showDiscount = true;
+          }
           
           return (
             <div key={p.id} className={`relative border ${theme.border} ${theme.bg} p-6 text-left`}>
@@ -403,6 +421,11 @@ function Home() {
 
               <div className="flex justify-between items-end border-t border-[var(--color-nordik-gold-dim)]/20 pt-4">
                 <div>
+                  {showDiscount && (
+                    <div className="text-[10px] text-[var(--color-nordik-gold)] mb-1 uppercase tracking-widest font-bold">
+                      De R$ {valorReal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} por
+                    </div>
+                  )}
                   <span className={`text-2xl font-cinzel font-bold ${theme.text}`}>
                     R$ {Number(p.preco).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
                   </span>
@@ -425,21 +448,45 @@ function Home() {
         return (
           <section id="planos" className="py-16 px-8 text-center flex flex-col items-center bg-black/60 border-t border-[var(--color-nordik-gold-dim)]/20 scroll-mt-6">
             
+            {/* COMBO CABELO (NØRDIK BLACK) - Especial */}
+            {planoComboCabelo.length > 0 && (
+              <div className="w-full max-w-sm md:max-w-5xl mx-auto mb-16">
+                <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)] justify-center">
+                  <Shield size={28} />
+                </div>
+                <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+                  Combo Cabelo
+                </h2>
+                <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10 flex items-center justify-center flex-wrap gap-1">
+                  Pacote com 4 cortes no mês com super desconto <span className="text-[var(--color-nordik-gold)] font-bold">5.6% OFF</span>
+                </p>
+
+                <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full justify-center">
+                  <div className="md:col-start-2">
+                    {planoComboCabelo.map(p => renderPlanoCard(p))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* COMBO 1: Pague 3, Leve 4 */}
             {planosPague3Leve4.length > 0 && (
               <div className="w-full max-w-sm md:max-w-5xl mx-auto mb-16">
+                {planoComboCabelo.length > 0 && (
+                  <div className="border-t border-[var(--color-nordik-gold-dim)]/20 mb-12" />
+                )}
                 <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)] justify-center">
                   <Crown size={28} />
                 </div>
                 <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
                   Club Nørdik
                 </h2>
-                <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
-                  Pague 3, Leve 4 cortes no mês
+                <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10 flex items-center justify-center flex-wrap gap-1">
+                  Pague 3, Leve 4 cortes no mês <span className="text-[var(--color-nordik-gold)] font-bold">25% OFF</span>
                 </p>
 
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full">
-                  {planosPague3Leve4.map(renderPlanoCard)}
+                  {planosPague3Leve4.map(p => renderPlanoCard(p))}
                 </div>
               </div>
             )}
@@ -447,7 +494,7 @@ function Home() {
             {/* COMBO 2: Pague 2, 3º pela Metade */}
             {planosPague2Metade.length > 0 && (
               <div className="w-full max-w-sm md:max-w-5xl mx-auto">
-                {planosPague3Leve4.length > 0 && (
+                {(planosPague3Leve4.length > 0 || planoComboCabelo.length > 0) && (
                   <div className="border-t border-[var(--color-nordik-gold-dim)]/20 mb-12" />
                 )}
                 <div className="flex items-center gap-3 mb-4 text-[var(--color-nordik-gold)] justify-center">
@@ -461,7 +508,7 @@ function Home() {
                 </p>
 
                 <div className="flex flex-col md:grid md:grid-cols-3 gap-6 w-full">
-                  {planosPague2Metade.map(renderPlanoCard)}
+                  {planosPague2Metade.map(p => renderPlanoCard(p))}
                 </div>
               </div>
             )}
