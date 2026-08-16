@@ -1,9 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Crown, Shield, Sword, ChevronDown, MessageCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { CalendarDays, MapPin, Crown, Shield, Sword, ChevronDown, MessageCircle, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from './lib/supabase';
 import { Agendamento } from './pages/Agendamento';
 import { Vip } from './pages/Vip';
+
+// Context para compartilhar o status do agendamento
+const AgendamentoContext = createContext<{ ativo: boolean; loading: boolean }>({ ativo: true, loading: true });
+export const useAgendamentoStatus = () => useContext(AgendamentoContext);
 
 // Ícone do Instagram (SVG inline, pois lucide-react não exporta Instagram nesta versão)
 function InstagramIcon({ size = 24 }: { size?: number }) {
@@ -74,6 +78,8 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 // Tela Inicial (Home - Landing Page Premium)
 function Home() {
+  const { ativo: agendamentoAtivo } = useAgendamentoStatus();
+
   const [planos, setPlanos] = useState<{ id: string, nome: string, preco: number, descricao: string, servicos_incluidos: string[], visitas_mes: number }[]>([]);
 
   useEffect(() => {
@@ -125,11 +131,15 @@ function Home() {
 
         <div className="relative z-10 w-full max-w-sm mx-auto md:max-w-md mb-8 animate-in fade-in zoom-in duration-1000 delay-500 flex flex-col gap-3">
           <Link 
-            to="/agendar" 
-            className="bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-[0_0_20px_rgba(202,165,101,0.3)]"
+            to={agendamentoAtivo ? "/agendar" : "#"}
+            onClick={e => { if (!agendamentoAtivo) e.preventDefault(); }}
+            className={`font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors ${agendamentoAtivo ? 'bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black shadow-[0_0_20px_rgba(202,165,101,0.3)]' : 'bg-[#333] text-[#888] cursor-not-allowed'}`}
           >
-            <CalendarDays size={20} />
-            Agendar Horário
+            {agendamentoAtivo ? (
+              <><CalendarDays size={20} /> Agendar Horário</>
+            ) : (
+              <><AlertTriangle size={20} /> Voltamos em Breve</>
+            )}
           </Link>
 
           <div className="grid grid-cols-2 gap-3">
@@ -543,29 +553,97 @@ function Home() {
 
       {/* 6. CTA FINAL */}
       <section className="px-8 mt-4 mb-4">
-        <Link 
-          to="/agendar" 
-          className="border border-[var(--color-nordik-gold)] bg-black hover:bg-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold)] hover:text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors"
-        >
-          <CalendarDays size={20} />
-          Reservar Meu Horário
-        </Link>
+        {agendamentoAtivo ? (
+          <Link 
+            to="/agendar" 
+            className="border border-[var(--color-nordik-gold)] bg-black hover:bg-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold)] hover:text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors"
+          >
+            <CalendarDays size={20} />
+            Reservar Meu Horário
+          </Link>
+        ) : (
+          <a 
+            href="https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="border border-[#25D366] bg-black hover:bg-[#25D366]/10 text-[#25D366] font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors"
+          >
+            <MessageCircle size={20} />
+            Agendar pelo WhatsApp
+          </a>
+        )}
       </section>
     </div>
   );
 }
 
-function App() {
+// Tela de Agendamento Bloqueado
+function AgendamentoBloqueado() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/agendar" element={<Agendamento />} />
-          <Route path="/vip" element={<Vip />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-6 -m-6">
+      <div className="relative z-10 animate-in fade-in zoom-in-95 duration-700 flex flex-col items-center space-y-6 w-full max-w-md mx-auto">
+        <div className="w-20 h-20 bg-[var(--color-nordik-gold)]/10 rounded-full flex items-center justify-center text-[var(--color-nordik-gold)] mb-2 shadow-[0_0_40px_rgba(202,165,101,0.15)]">
+          <CalendarDays size={40} />
+        </div>
+        <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase leading-relaxed">
+          Voltamos em Breve
+        </h2>
+        <p className="text-[15px] text-white/70 max-w-[320px] mx-auto leading-relaxed">
+          Estamos reorganizando nossa agenda. Chame a gente no WhatsApp que garantimos seu horário!
+        </p>
+        <div className="w-full pt-6 space-y-4">
+          <a 
+            href="https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
+          >
+            <MessageCircle size={20} />
+            Agendar pelo WhatsApp
+          </a>
+          <Link 
+            to="/"
+            className="bg-transparent border border-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold)] hover:text-black hover:border-[var(--color-nordik-gold)] font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center transition-all"
+          >
+            Voltar ao Início
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [agendamentoAtivo, setAgendamentoAtivo] = useState(true);
+  const [agendamentoLoading, setAgendamentoLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAgendamento() {
+      const { data } = await supabase
+        .from('configuracoes')
+        .select('valor')
+        .eq('chave', 'agendamento_ativo')
+        .limit(1);
+      if (data && data.length > 0) {
+        setAgendamentoAtivo(data[0].valor === 'true');
+      }
+      setAgendamentoLoading(false);
+    }
+    checkAgendamento();
+  }, []);
+
+  return (
+    <AgendamentoContext.Provider value={{ ativo: agendamentoAtivo, loading: agendamentoLoading }}>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/agendar" element={agendamentoAtivo ? <Agendamento /> : <AgendamentoBloqueado />} />
+            <Route path="/vip" element={<Vip />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </AgendamentoContext.Provider>
   );
 }
 
