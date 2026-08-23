@@ -694,16 +694,24 @@ export function Agendamento() {
               .
             </p>
             <div className="w-full pt-12 space-y-4">
-              {formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) && (
-                <a
-                  href={`${formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url)}?text=Ol%C3%A1%21+Acabei+de+agendar+meu+hor%C3%A1rio+para+${encodeURIComponent(servicosSelecionados.map((s) => s.nome).join(", "))}+no+dia+${format(dataSelecionada, "dd/MM")}+%C3%A0s+${horaSelecionada}%21`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
-                >
-                  Confirmar pelo WhatsApp
-                </a>
-              )}
+              {(() => {
+                const rawWhats = tenant?.configuracoes?.whatsapp_url || 
+                  (tenant?.slug === "nordik" ? "https://wa.me/5566999888986" : "");
+                const whatsUrl = rawWhats ? formatWhatsAppUrl(rawWhats) : "";
+
+                if (!whatsUrl) return null;
+
+                return (
+                  <a
+                    href={`${whatsUrl}?text=Ol%C3%A1%21+Acabei+de+agendar+meu+hor%C3%A1rio+para+${encodeURIComponent(servicosSelecionados.map((s) => s.nome).join(", "))}+no+dia+${format(dataSelecionada, "dd/MM")}+%C3%A0s+${horaSelecionada}%21`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
+                  >
+                    Confirmar pelo WhatsApp
+                  </a>
+                );
+              })()}
               <button
                 onClick={() => (window.location.href = `/${tenant?.slug}`)}
                 className="bg-transparent border border-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold)] hover:text-black hover:border-[var(--color-nordik-gold)] font-bold uppercase tracking-widest py-5 px-6 w-full transition-all backdrop-blur-sm"
