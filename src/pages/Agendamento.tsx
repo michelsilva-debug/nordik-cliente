@@ -477,7 +477,7 @@ export function Agendamento() {
             )}
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent z-10">
+          <div className="sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent z-10 -mx-6 -mb-6">
             <div className="max-w-md mx-auto">
               <button
                 disabled={servicosSelecionados.length === 0}
