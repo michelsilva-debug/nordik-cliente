@@ -254,7 +254,7 @@ function Home() {
       </section>
 
       {/* SEÇÕES DE HISTÓRIA / MARCA (SÓ EXIBE SE O CLIENTE PRO ATIVAR A LANDING PAGE) */}
-      {landingAtiva && sobre && (
+      {landingAtiva && sobre && tenant?.slug !== "nordik" && (
         <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
           <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
             A Marca
@@ -263,6 +263,266 @@ function Home() {
             {sobre}
           </div>
         </section>
+      )}
+
+      {/* SEÇÕES EXCLUSIVAS NØRDIK BARBERSHOP */}
+      {tenant?.slug === "nordik" && (
+        <>
+          {/* 2. A MARCA */}
+          <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
+            <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
+              A Marca
+            </h2>
+            <div className="space-y-6 text-[13px] text-[var(--color-nordik-gold-light)] leading-relaxed max-w-sm">
+              <p>
+                A Nørdik Barbershop nasce para homens que carregam presença,
+                disciplina e ambição.
+              </p>
+              <p>
+                Não é apenas sobre um corte, é sobre legado, respeito e tradição.
+              </p>
+              <p>
+                Inspirada na força, elegância e atitude atemporal, a Nørdik
+                representa o homem que deixa sua marca por onde passa.
+              </p>
+            </div>
+          </section>
+
+          {/* 3. NOSSO OBJETIVO */}
+          <section className="py-16 px-8 bg-black/50 border-y border-[var(--color-nordik-gold-dim)]/20">
+            <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-10 text-center">
+              Nosso Objetivo
+            </h2>
+
+            <div className="space-y-8 max-w-sm mx-auto md:max-w-5xl md:grid md:grid-cols-3 md:gap-8 md:space-y-0">
+              <div className="flex flex-col md:items-center md:text-center gap-4">
+                <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">⚔️</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-sm mb-1">
+                    Elevar a Experiência
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Transformar o ato de se cuidar em um ritual de poder e autoestima.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:items-center md:text-center gap-4">
+                <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">🛡️</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-sm mb-1">
+                    Ser Referência
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Ser referência em excelência, estilo e atendimento masculino.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:items-center md:text-center gap-4">
+                <div className="w-10 h-10 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center shrink-0 mt-1 md:mt-0">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">🤝</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-sm mb-1">
+                    Criar Conexões
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Construir uma comunidade de homens que valorizam tradição e respeito.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4. NOSSO ESTILO */}
+          <section className="py-16 px-8 text-center flex flex-col items-center">
+            <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
+              Nosso Estilo
+            </h2>
+
+            <div className="text-[13px] text-[var(--color-nordik-gold-light)] leading-relaxed max-w-sm mb-12 space-y-4">
+              <p>Um ambiente masculino, sóbrio e sofisticado.</p>
+              <p>
+                Cada detalhe pensado para proporcionar uma experiência única e memorável.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-12 w-full max-w-sm md:max-w-4xl">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center text-[var(--color-nordik-gold)] bg-black/50">
+                  <span className="text-2xl font-cinzel">N</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold">
+                  Tradição
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center text-[var(--color-nordik-gold)] bg-black/50">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold">
+                  Sofisticação
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center text-[var(--color-nordik-gold)] bg-black/50">
+                  <span className="text-2xl">👑</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold">
+                  Exclusividade
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center text-[var(--color-nordik-gold)] bg-black/50">
+                  <span className="text-2xl">⏳</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold">
+                  Atemporalidade
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* 4.5 NOSSO DIFERENCIAL - BARBOTERAPIA */}
+          <section className="py-16 px-8 bg-black/30 border-t border-[var(--color-nordik-gold-dim)]/20">
+            <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+              Barboterapia
+            </h2>
+            <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
+              O Nosso Diferencial
+            </p>
+
+            <div className="space-y-6 max-w-sm mx-auto md:max-w-4xl md:grid md:grid-cols-2 md:gap-x-16 md:gap-y-10 md:space-y-0">
+              <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">✨</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">
+                    Finalização Premium
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Produtos exclusivos para hidratação e perfumação dos fios.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">💆‍♂️</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">
+                    Massagem Relaxante
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Alivia tensões faciais e proporciona uma experiência diferenciada.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">💨</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">
+                    Tratamento com Ozônio
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Higiene bem-estar, e experiência diferenciada.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row md:items-center gap-4 items-start">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center shrink-0 mt-1 md:mt-0 bg-black">
+                  <span className="text-[var(--color-nordik-gold)] text-lg">♨️</span>
+                </div>
+                <div>
+                  <h3 className="font-cinzel font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest text-[11px] mb-1">
+                    Toalha Quente
+                  </h3>
+                  <p className="text-xs text-[var(--color-nordik-gold-dim)] leading-relaxed">
+                    Abertura dos poros promovendo maior conforto durante o serviço.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4.6 CANTINHO PREMIUM DE BEBIDAS */}
+          <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
+            <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-4 text-center">
+              Nordik Lounge
+            </h2>
+            <p className="text-xs text-[var(--color-nordik-gold-dim)] text-center uppercase tracking-widest mb-10">
+              Nosso Cantinho de Bebidas
+            </p>
+
+            <div className="text-[13px] text-[var(--color-nordik-gold-light)] leading-relaxed max-w-sm mb-10 space-y-4">
+              <p>
+                Sua experiência completa. Desfrute de uma bebida gelada enquanto
+                cuidamos do seu visual.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-4 md:gap-x-8 w-full max-w-sm md:max-w-4xl">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+                  <span className="text-2xl">🍺</span>
+                </div>
+                <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">
+                  Cervejas Premium
+                </span>
+                <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">
+                  Heineken • Corona • Império Gold
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+                  <span className="text-2xl">⚡</span>
+                </div>
+                <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">
+                  Energéticos
+                </span>
+                <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">
+                  Red Bull Clássico
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+                  <span className="text-2xl">🥤</span>
+                </div>
+                <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">
+                  Refrigerantes
+                </span>
+                <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">
+                  Coca-Cola Lata
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold-dim)] flex items-center justify-center bg-black/50 mb-1">
+                  <span className="text-2xl">🧃</span>
+                </div>
+                <span className="text-[11px] font-bold tracking-widest text-[var(--color-nordik-gold-light)] uppercase">
+                  Kids
+                </span>
+                <span className="text-[9px] text-[var(--color-nordik-gold-dim)] uppercase tracking-wider text-center px-2">
+                  Toddynho Gelado
+                </span>
+              </div>
+            </div>
+          </section>
+        </>
       )}
       {/* 4.7 PLANOS MENSAIS */}
       {planos.length > 0 &&
