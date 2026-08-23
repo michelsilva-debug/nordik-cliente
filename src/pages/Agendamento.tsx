@@ -686,16 +686,18 @@ export function Agendamento() {
               .
             </p>
             <div className="w-full pt-12 space-y-4">
-              <a
-                href={`https://wa.me/5566999888986?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map((s) => s.nome).join(", ")} no dia ${format(dataSelecionada, "dd/MM")} às ${horaSelecionada}!`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
-              >
-                Confirmar pelo WhatsApp
-              </a>
+              {formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) && (
+                <a
+                  href={`${formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url)}&text=Olá! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map((s) => s.nome).join(", ")} no dia ${format(dataSelecionada, "dd/MM")} às ${horaSelecionada}!`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
+                >
+                  Confirmar pelo WhatsApp
+                </a>
+              )}
               <button
-                onClick={() => (window.location.href = "/")}
+                onClick={() => (window.location.href = `/${tenant?.slug}`)}
                 className="bg-transparent border border-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold)] hover:text-black hover:border-[var(--color-nordik-gold)] font-bold uppercase tracking-widest py-5 px-6 w-full transition-all backdrop-blur-sm"
               >
                 Voltar ao Início
