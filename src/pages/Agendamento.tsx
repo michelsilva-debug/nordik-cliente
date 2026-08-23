@@ -342,9 +342,9 @@ export function Agendamento() {
 
       // 4. Ir para sucesso
       setStep(5);
-    } catch (err) {
-      console.error(err);
-      setError("Ocorreu um erro ao agendar. Tente novamente.");
+    } catch (err: any) {
+      console.error("Erro ao agendar:", err);
+      setError(`Erro: ${err?.message || err?.code || JSON.stringify(err)}`);
     } finally {
       setLoading(false);
     }
