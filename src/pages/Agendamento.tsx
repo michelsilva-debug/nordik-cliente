@@ -461,8 +461,8 @@ export function Agendamento() {
                 );
               })}
 
-            {/* Botão Convênio PM */}
-            {!isPmValido && (
+            {/* Botão Convênio PM - EXCLUSIVO NØRDIK */}
+            {tenant?.slug === "nordik" && !isPmValido && (
               <button
                 onClick={() => setShowPmModal(true)}
                 className="w-full bg-black border border-[var(--color-nordik-gold-dim)]/30 p-4 mt-6 flex items-center justify-center gap-2 hover:border-[var(--color-nordik-gold)]/60 transition-colors"
