@@ -28,6 +28,14 @@ interface HorarioDisponivel {
   disponivel: boolean;
 }
 
+// Helper para formatar número de WhatsApp em link
+const formatWhatsAppUrl = (val?: string): string => {
+  if (!val) return "";
+  if (val.startsWith("http")) return val;
+  const num = val.replace(/\D/g, "");
+  return num ? `https://wa.me/${num}` : "";
+};
+
 export function Agendamento() {
   const { tenant } = useTenant();
   const [step, setStep] = useState(1);
@@ -688,7 +696,7 @@ export function Agendamento() {
             <div className="w-full pt-12 space-y-4">
               {formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) && (
                 <a
-                  href={`${formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url)}&text=Olá! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map((s) => s.nome).join(", ")} no dia ${format(dataSelecionada, "dd/MM")} às ${horaSelecionada}!`}
+                  href={`${formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url)}?text=Ol%C3%A1%21+Acabei+de+agendar+meu+hor%C3%A1rio+para+${encodeURIComponent(servicosSelecionados.map((s) => s.nome).join(", "))}+no+dia+${format(dataSelecionada, "dd/MM")}+%C3%A0s+${horaSelecionada}%21`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
