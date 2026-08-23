@@ -121,7 +121,7 @@ export function Agendamento() {
       if (sData) setServicos(sData);
 
       // Verificação automática do PM via localStorage
-      const savedPmPhone = localStorage.getItem("nordik_pm_phone");
+      const savedPmPhone = localStorage.getItem(`@${tenant?.slug}:pm_phone`);
       if (savedPmPhone) {
         const { data: pmData } = await supabase
           .from("clientes")
@@ -222,7 +222,7 @@ export function Agendamento() {
         if (cliente.pm_status === "aprovado") {
           setIsPmValido(true);
           setShowPmModal(false);
-          localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
+          localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
         } else if (cliente.pm_status === "pendente") {
           setPmMsg({
             type: "warning",
@@ -245,7 +245,7 @@ export function Agendamento() {
             type: "success",
             text: "Matrícula recebida! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
           });
-          localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
+          localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
         }
       } else {
         if (!pmMatricula) {
@@ -272,7 +272,7 @@ export function Agendamento() {
           type: "success",
           text: "Cadastro criado! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
         });
-        localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
+        localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
       }
     } catch (err) {
       setPmMsg({ type: "error", text: "Erro de conexão. Tente novamente." });
@@ -729,7 +729,7 @@ export function Agendamento() {
               Convênio PM
             </h3>
             <p className="text-white/70 text-xs text-center mb-6 leading-relaxed">
-              Informe seus dados para validar o acesso ao Plano NØRDIK exclusivo
+              Informe seus dados para validar o acesso ao Plano Exclusivo
               para policiais militares.
             </p>
 

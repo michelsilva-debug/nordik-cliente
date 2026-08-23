@@ -42,7 +42,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const logoUrl = tenant?.configuracoes?.logo_url || "/logo.png";
   const instaUrl =
     tenant?.configuracoes?.instagram_url ||
-    "https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7";
+    (tenant?.slug === "nordik" ? "https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7" : "");
   return (
     <div className="min-h-screen flex flex-col w-full max-w-[448px] md:max-w-[900px] lg:max-w-[1200px] mx-auto bg-black md:shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border-x border-[var(--color-nordik-border)] transition-all duration-500 overflow-hidden">
       {/* Marca d'água nórdica — padrão repetido sutil */}
@@ -72,7 +72,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <Link to={`/${tenant?.slug || ""}`}>
           <img
             src={logoUrl}
-            alt="Nordik Barbershop"
+            alt={tenant?.nome || "Barbearia"}
             className="h-20 md:h-24 object-contain transition-all duration-500"
           />
         </Link>
@@ -555,10 +555,12 @@ function Home() {
 
           const renderPlanoCard = (p: (typeof planos)[0]) => {
             const theme = getPlanoTheme(p.nome);
-            const whatsBase = tenant?.configuracoes?.whatsapp_url
-              ? tenant.configuracoes.whatsapp_url.split("?")[0]
-              : "https://wa.me/5566999888986";
-            const linkWhats = `${whatsBase}?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`;
+            const rawWhats = tenant?.configuracoes?.whatsapp_url ||
+              (tenant?.slug === "nordik" ? "https://wa.me/5566999888986" : "");
+            const whatsBase = rawWhats ? formatWhatsAppUrl(rawWhats) : "";
+            const linkWhats = whatsBase
+              ? `${whatsBase}?text=Ol%C3%A1%2C%20gostaria%20de%20assinar%20o%20${encodeURIComponent(p.nome)}%20(R%24%20${p.preco})%21`
+              : "";
 
             const isComboCabelo = p.nome.toUpperCase().includes("BLACK");
             let valorReal = 0;

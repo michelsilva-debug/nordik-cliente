@@ -34,7 +34,8 @@ export function Vip() {
   const [error, setError] = useState('');
 
   const checkSession = async () => {
-    const savedId = localStorage.getItem('@nordik:clienteId');
+    const sessionKey = `@${tenant?.slug}:clienteId`;
+    const savedId = localStorage.getItem(sessionKey);
     if (savedId) {
       await fetchClienteData(savedId);
     } else {
@@ -54,7 +55,7 @@ export function Vip() {
         .single();
         
       if (cErr || !cData) {
-        localStorage.removeItem('@nordik:clienteId');
+        localStorage.removeItem(`@${tenant?.slug}:clienteId`);
         setCliente(null);
         setLoading(false);
         return;
@@ -146,7 +147,7 @@ export function Vip() {
       }
 
       if (clienteId) {
-        localStorage.setItem('@nordik:clienteId', clienteId);
+        localStorage.setItem(`@${tenant?.slug}:clienteId`, clienteId);
         await fetchClienteData(clienteId);
       }
     } catch {
@@ -156,7 +157,7 @@ export function Vip() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('@nordik:clienteId');
+    localStorage.removeItem(`@${tenant?.slug}:clienteId`);
     setCliente(null);
   };
 
@@ -300,7 +301,8 @@ export function Vip() {
         </div>
         
         <div className="text-center mb-6 relative z-10">
-          <h3 className="font-cinzel text-lg text-white tracking-[2px] uppercase mb-1">O Legado Nørdik</h3>
+          <h3 className="font-cinzel text-lg text-white tracking-[2px] uppercase mb-1">Cartão Fidelidade</h3>
+          <p className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-widest">{tenant?.nome || 'Barbearia'}</p>
           <p className="text-[10px] text-[var(--color-nordik-gold-dim)] uppercase tracking-widest">
             {isPremiado ? 'VOCÊ ATINGIU A MARCA!' : `Faltam ${10 - selosExibidos} cortes para o seu prêmio`}
           </p>
@@ -384,7 +386,7 @@ export function Vip() {
                     <span className="text-[10px] text-[var(--color-nordik-gold)] uppercase tracking-widest font-bold bg-[var(--color-nordik-gold)]/10 px-2 py-1">Pendente</span>
                   ) : null}
                   
-                  <button onClick={() => window.location.href = '/agendar'} className="text-[var(--color-nordik-gold-dim)] group-hover:text-[var(--color-nordik-gold)] transition-colors">
+                  <button onClick={() => window.location.href = `/${tenant?.slug}/agendar`} className="text-[var(--color-nordik-gold-dim)] group-hover:text-[var(--color-nordik-gold)] transition-colors">
                     <ChevronRight size={18} />
                   </button>
                 </div>
