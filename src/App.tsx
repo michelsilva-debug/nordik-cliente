@@ -110,9 +110,15 @@ function Layout({ children }: { children: React.ReactNode }) {
 function Home() {
   const { tenant } = useTenant();
   const agendamentoAtivo = tenant?.configuracoes?.agendamento_ativo !== "false";
-  const whatsUrl = tenant?.configuracoes?.whatsapp_url || "";
-  const mapsUrl = tenant?.configuracoes?.endereco_maps || "";
-  const enderecoTexto = tenant?.configuracoes?.endereco_texto || "";
+  const whatsUrl =
+    tenant?.configuracoes?.whatsapp_url ||
+    (tenant?.slug === "nordik" ? "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" : "");
+  const mapsUrl =
+    tenant?.configuracoes?.endereco_maps ||
+    (tenant?.slug === "nordik" ? "https://maps.google.com/?q=R.+Astorga,+244+-+Módulo+05,+Juína+-+MT" : "");
+  const enderecoTexto =
+    tenant?.configuracoes?.endereco_texto ||
+    (tenant?.slug === "nordik" ? "R. Astorga, 244 - Módulo 05\nJuína - MT" : "");
 
   const [planos, setPlanos] = useState<
     {
@@ -770,7 +776,7 @@ function AgendamentoBloqueado() {
   const { tenant } = useTenant();
   const whatsUrl =
     tenant?.configuracoes?.whatsapp_url ||
-    "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21";
+    (tenant?.slug === "nordik" ? "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" : "");
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-6 -m-6">
       <div className="relative z-10 animate-in fade-in zoom-in-95 duration-700 flex flex-col items-center space-y-6 w-full max-w-md mx-auto">
