@@ -106,12 +106,20 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Helper para formatar o link do WhatsApp
+const formatWhatsAppUrl = (val?: string) => {
+  if (!val) return "";
+  if (val.startsWith("http")) return val;
+  const num = val.replace(/\D/g, "");
+  return num ? `https://wa.me/${num}?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21` : "";
+};
+
 // Tela Inicial (Home - Landing Page Premium)
 function Home() {
   const { tenant } = useTenant();
   const agendamentoAtivo = tenant?.configuracoes?.agendamento_ativo !== "false";
   const whatsUrl =
-    tenant?.configuracoes?.whatsapp_url ||
+    formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) ||
     (tenant?.slug === "nordik" ? "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" : "");
   const mapsUrl =
     tenant?.configuracoes?.endereco_maps ||
@@ -775,7 +783,7 @@ function Home() {
 function AgendamentoBloqueado() {
   const { tenant } = useTenant();
   const whatsUrl =
-    tenant?.configuracoes?.whatsapp_url ||
+    formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) ||
     (tenant?.slug === "nordik" ? "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" : "");
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-6 -m-6">
