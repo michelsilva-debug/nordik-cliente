@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Crown, Star, Calendar, LogOut, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useTenant } from '../contexts/TenantContext';
 
 interface Cliente {
   id: string;
@@ -21,6 +22,7 @@ interface Agendamento {
 }
 
 export function Vip() {
+  const { tenant } = useTenant();
   const [loading, setLoading] = useState(true);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [historico, setHistorico] = useState<Agendamento[]>([]);
@@ -48,6 +50,7 @@ export function Vip() {
         .from('clientes')
         .select('*')
         .eq('id', id)
+        .eq('barbearia_id', tenant?.id)
         .single();
         
       if (cErr || !cData) {
@@ -65,6 +68,7 @@ export function Vip() {
         .select('*, planos(*)')
         .eq('cliente_id', id)
         .eq('status', 'ativo')
+        .eq('barbearia_id', tenant?.id)
         .maybeSingle();
       
       if (assData) setAssinatura(assData);
@@ -74,6 +78,7 @@ export function Vip() {
         .from('agenda')
         .select('*, servicos(*), barbeiros(*)')
         .eq('cliente_id', id)
+        .eq('barbearia_id', tenant?.id)
         .order('data', { ascending: false })
         .order('horario', { ascending: false })
         .limit(5); // Últimos 5 cortes
@@ -89,11 +94,11 @@ export function Vip() {
 
   useEffect(() => {
     const load = async () => {
-      await checkSession();
+      if (tenant?.id) await checkSession();
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [tenant?.id]);
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, '');
@@ -119,6 +124,7 @@ export function Vip() {
         .from('clientes')
         .select('id, nome, pontos_fidelidade')
         .eq('telefone', telefone)
+        .eq('barbearia_id', tenant?.id)
         .limit(1);
 
       let clienteId = null;
@@ -131,7 +137,7 @@ export function Vip() {
         // Criar novo
         const { data: novo, error: errInsert } = await supabase
           .from('clientes')
-          .insert([{ nome, telefone, pontos_fidelidade: 0 }])
+          .insert([{ barbearia_id: tenant?.id, nome, telefone, pontos_fidelidade: 0 }])
           .select('id')
           .single();
           
@@ -340,7 +346,7 @@ export function Vip() {
           <h3 className="text-sm font-bold text-[var(--color-nordik-gold-light)] uppercase tracking-widest flex items-center gap-2">
             <Calendar size={16} className="text-[var(--color-nordik-gold)]" /> Últimos Cortes
           </h3>
-          <button onClick={() => window.location.href = '/agendar'} className="text-[10px] text-[var(--color-nordik-gold)] uppercase tracking-widest hover:underline">
+          <button onClick={() => window.location.href = `/${tenant?.slug}/agendar`} className="text-[10px] text-[var(--color-nordik-gold)] uppercase tracking-widest hover:underline">
             Agendar Novo
           </button>
         </div>

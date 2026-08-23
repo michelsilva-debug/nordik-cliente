@@ -1,25 +1,46 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { ChevronRight, ChevronLeft, Calendar as CalendarIcon, User, CheckCircle2 } from 'lucide-react';
-import { format, addDays, startOfToday } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+import {
+  ChevronRight,
+  ChevronLeft,
+  Calendar as CalendarIcon,
+  User,
+  CheckCircle2,
+} from "lucide-react";
+import { format, addDays, startOfToday } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useTenant } from "../contexts/TenantContext";
 
-interface Barbeiro { id: string; nome: string; }
-interface Servico { id: string; nome: string; nome_nordik: string | null; valor: number; duracao_min?: number; exclusivo_pm?: boolean; }
-interface HorarioDisponivel { hora: string; disponivel: boolean; }
+interface Barbeiro {
+  id: string;
+  nome: string;
+}
+interface Servico {
+  id: string;
+  nome: string;
+  nome_nordik: string | null;
+  valor: number;
+  duracao_min?: number;
+  exclusivo_pm?: boolean;
+}
+interface HorarioDisponivel {
+  hora: string;
+  disponivel: boolean;
+}
 
 export function Agendamento() {
+  const { tenant } = useTenant();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Estados do Convênio PM
   const [isPmValido, setIsPmValido] = useState(false);
   const [showPmModal, setShowPmModal] = useState(false);
-  const [pmTelefone, setPmTelefone] = useState('');
-  const [pmMatricula, setPmMatricula] = useState('');
+  const [pmTelefone, setPmTelefone] = useState("");
+  const [pmMatricula, setPmMatricula] = useState("");
   const [pmLoading, setPmLoading] = useState(false);
-  const [pmMsg, setPmMsg] = useState({ type: '', text: '' });
+  const [pmMsg, setPmMsg] = useState({ type: "", text: "" });
 
   // Dados do DB
   const [barbeiros, setBarbeiros] = useState<Barbeiro[]>([]);
@@ -27,19 +48,27 @@ export function Agendamento() {
   const [horariosOcupados, setHorariosOcupados] = useState<string[]>([]);
 
   // Seleções do Usuário
-  const [barbeiroSelecionado, setBarbeiroSelecionado] = useState<Barbeiro | null>(null);
-  const [servicosSelecionados, setServicosSelecionados] = useState<Servico[]>([]);
+  const [barbeiroSelecionado, setBarbeiroSelecionado] =
+    useState<Barbeiro | null>(null);
+  const [servicosSelecionados, setServicosSelecionados] = useState<Servico[]>(
+    [],
+  );
   const [dataSelecionada, setDataSelecionada] = useState<Date>(startOfToday());
   const [horaSelecionada, setHoraSelecionada] = useState<string | null>(null);
-  const [clienteNome, setClienteNome] = useState('');
-  const [clienteTelefone, setClienteTelefone] = useState('');
+  const [clienteNome, setClienteNome] = useState("");
+  const [clienteTelefone, setClienteTelefone] = useState("");
 
   // Geração de dias (próximos 30 dias úteis — sem domingos)
-  const diasDisponiveis = Array.from({ length: 30 }).map((_, i) => addDays(startOfToday(), i)).filter(d => d.getDay() !== 0);
+  const diasDisponiveis = Array.from({ length: 30 })
+    .map((_, i) => addDays(startOfToday(), i))
+    .filter((d) => d.getDay() !== 0);
 
   const calcularDuracaoTotal = () => {
     if (servicosSelecionados.length === 0) return 30;
-    const soma = servicosSelecionados.reduce((acc, curr) => acc + (curr.duracao_min || 30), 0);
+    const soma = servicosSelecionados.reduce(
+      (acc, curr) => acc + (curr.duracao_min || 30),
+      0,
+    );
     return Math.max(soma, 30);
   };
 
@@ -48,12 +77,12 @@ export function Agendamento() {
     const horarios: HorarioDisponivel[] = [];
     let h = 8;
     let m = 0;
-    
+
     // Gera horários até as 19:30 (último horário)
     while (h < 20) {
-      horarios.push({ 
-        hora: `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`, 
-        disponivel: true 
+      horarios.push({
+        hora: `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`,
+        disponivel: true,
       });
       m += 30;
       if (m >= 60) {
@@ -67,53 +96,71 @@ export function Agendamento() {
 
   useEffect(() => {
     async function fetchIniciais() {
-      const { data: bData } = await supabase.from('barbeiros').select('id, nome').order('nome');
+      const { data: bData } = await supabase
+        .from("barbeiros")
+        .select("id, nome")
+        .eq("barbearia_id", tenant?.id)
+        .order("nome");
       if (bData) setBarbeiros(bData);
-      
-      const { data: sData, error: sErr } = await supabase.from('servicos').select('id, nome, nome_nordik, valor, duracao_min, exclusivo_pm').eq('ativo', true).order('nome');
-      if (sErr) console.error('Erro ao buscar servicos:', sErr);
+
+      const { data: sData, error: sErr } = await supabase
+        .from("servicos")
+        .select("id, nome, nome_nordik, valor, duracao_min, exclusivo_pm")
+        .eq("ativo", true)
+        .eq("barbearia_id", tenant?.id)
+        .order("nome");
+      if (sErr) console.error("Erro ao buscar servicos:", sErr);
       if (sData) setServicos(sData);
 
       // Verificação automática do PM via localStorage
-      const savedPmPhone = localStorage.getItem('nordik_pm_phone');
+      const savedPmPhone = localStorage.getItem("nordik_pm_phone");
       if (savedPmPhone) {
-        const { data: pmData } = await supabase.from('clientes').select('pm_status').eq('telefone', savedPmPhone).limit(1);
-        if (pmData && pmData.length > 0 && pmData[0].pm_status === 'aprovado') {
+        const { data: pmData } = await supabase
+          .from("clientes")
+          .select("pm_status")
+          .eq("telefone", savedPmPhone)
+          .eq("barbearia_id", tenant?.id)
+          .limit(1);
+        if (pmData && pmData.length > 0 && pmData[0].pm_status === "aprovado") {
           setIsPmValido(true);
         }
       }
     }
-    fetchIniciais();
-  }, []);
+    if (tenant?.id) fetchIniciais();
+  }, [tenant?.id]);
 
   useEffect(() => {
     const buscarHorariosOcupados = async () => {
       setLoading(true);
-      const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
-      
+      const dataStr = format(dataSelecionada, "yyyy-MM-dd");
+
       const { data: dataAgenda } = await supabase
-        .from('agenda')
-        .select('horario, servicos(duracao_min)')
-        .eq('data', dataStr);
-      
+        .from("agenda")
+        .select("horario, servicos(duracao_min)")
+        .eq("data", dataStr)
+        .eq("barbearia_id", tenant?.id);
+
       if (dataAgenda) {
         const blocosOcupados = new Set<string>();
-        dataAgenda.forEach(d => {
+        dataAgenda.forEach((d) => {
           if (!d.horario) return;
           const horaBase = d.horario.substring(0, 5);
           blocosOcupados.add(horaBase);
-          
+
           // @ts-ignore
           const duracao = d.servicos?.duracao_min || 30;
           if (duracao > 30) {
-             const slotsExtras = Math.ceil(duracao / 30) - 1;
-             let [h, m] = horaBase.split(':').map(Number);
-             for(let i = 1; i <= slotsExtras; i++) {
-               m += 30;
-               if (m >= 60) { h += 1; m -= 60; }
-               const extraHora = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-               blocosOcupados.add(extraHora);
-             }
+            const slotsExtras = Math.ceil(duracao / 30) - 1;
+            let [h, m] = horaBase.split(":").map(Number);
+            for (let i = 1; i <= slotsExtras; i++) {
+              m += 30;
+              if (m >= 60) {
+                h += 1;
+                m -= 60;
+              }
+              const extraHora = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+              blocosOcupados.add(extraHora);
+            }
           }
         });
         setHorariosOcupados(Array.from(blocosOcupados));
@@ -129,7 +176,7 @@ export function Agendamento() {
   }, [step, dataSelecionada, barbeiroSelecionado]);
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length > 11) value = value.slice(0, 11);
     if (value.length > 2) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
     if (value.length > 9) value = `${value.slice(0, 10)}-${value.slice(10)}`;
@@ -137,7 +184,7 @@ export function Agendamento() {
   };
 
   const handlePmTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length > 11) value = value.slice(0, 11);
     if (value.length > 2) value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
     if (value.length > 9) value = `${value.slice(0, 10)}-${value.slice(10)}`;
@@ -147,65 +194,100 @@ export function Agendamento() {
   const handlePmSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pmTelefone.length < 14) {
-      setPmMsg({ type: 'error', text: 'Preencha o telefone corretamente.' });
+      setPmMsg({ type: "error", text: "Preencha o telefone corretamente." });
       return;
     }
-    
+
     setPmLoading(true);
-    setPmMsg({ type: '', text: '' });
-    
+    setPmMsg({ type: "", text: "" });
+
     try {
-      const { data } = await supabase.from('clientes').select('id, pm_status').eq('telefone', pmTelefone).limit(1);
-      
+      const { data } = await supabase
+        .from("clientes")
+        .select("id, pm_status")
+        .eq("telefone", pmTelefone)
+        .eq("barbearia_id", tenant?.id)
+        .limit(1);
+
       if (data && data.length > 0) {
         const cliente = data[0];
-        if (cliente.pm_status === 'aprovado') {
+        if (cliente.pm_status === "aprovado") {
           setIsPmValido(true);
           setShowPmModal(false);
-          localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
-        } else if (cliente.pm_status === 'pendente') {
-          setPmMsg({ type: 'warning', text: 'Sua matrícula já está em análise! Agende um corte normal e apresente a funcional na barbearia para aprovação.' });
+          localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
+        } else if (cliente.pm_status === "pendente") {
+          setPmMsg({
+            type: "warning",
+            text: "Sua matrícula já está em análise! Agende um corte normal e apresente a funcional na barbearia para aprovação.",
+          });
         } else {
           if (!pmMatricula) {
-            setPmMsg({ type: 'error', text: 'Para o primeiro acesso, a matrícula é obrigatória.' });
+            setPmMsg({
+              type: "error",
+              text: "Para o primeiro acesso, a matrícula é obrigatória.",
+            });
             setPmLoading(false);
             return;
           }
-          await supabase.from('clientes').update({ pm_matricula: pmMatricula, pm_status: 'pendente' }).eq('id', cliente.id);
-          setPmMsg({ type: 'success', text: 'Matrícula recebida! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.' });
-          localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
+          await supabase
+            .from("clientes")
+            .update({ pm_matricula: pmMatricula, pm_status: "pendente" })
+            .eq("id", cliente.id);
+          setPmMsg({
+            type: "success",
+            text: "Matrícula recebida! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
+          });
+          localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
         }
       } else {
         if (!pmMatricula) {
-          setPmMsg({ type: 'error', text: 'Para o primeiro acesso, a matrícula é obrigatória.' });
+          setPmMsg({
+            type: "error",
+            text: "Para o primeiro acesso, a matrícula é obrigatória.",
+          });
           setPmLoading(false);
           return;
         }
-        await supabase.from('clientes').insert([{ telefone: pmTelefone, nome: 'PM ' + pmMatricula, pm_matricula: pmMatricula, pm_status: 'pendente', pontos_fidelidade: 0 }]);
-        setPmMsg({ type: 'success', text: 'Cadastro criado! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.' });
-        localStorage.setItem('nordik_pm_phone', pmTelefone); // Salva no celular
+        await supabase
+          .from("clientes")
+          .insert([
+            {
+              barbearia_id: tenant?.id,
+              telefone: pmTelefone,
+              nome: "PM " + pmMatricula,
+              pm_matricula: pmMatricula,
+              pm_status: "pendente",
+              pontos_fidelidade: 0,
+            },
+          ]);
+        setPmMsg({
+          type: "success",
+          text: "Cadastro criado! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
+        });
+        localStorage.setItem("nordik_pm_phone", pmTelefone); // Salva no celular
       }
     } catch (err) {
-      setPmMsg({ type: 'error', text: 'Erro de conexão. Tente novamente.' });
+      setPmMsg({ type: "error", text: "Erro de conexão. Tente novamente." });
     }
     setPmLoading(false);
   };
 
   const confirmarAgendamento = async () => {
     if (!clienteNome || clienteTelefone.length < 14) {
-      setError('Por favor, preencha nome e telefone válidos.');
+      setError("Por favor, preencha nome e telefone válidos.");
       return;
     }
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // 1. Procurar se cliente já existe pelo telefone
       let clienteId = null;
       const { data: clientesExistentes } = await supabase
-        .from('clientes')
-        .select('id')
-        .eq('telefone', clienteTelefone)
+        .from("clientes")
+        .select("id")
+        .eq("telefone", clienteTelefone)
+        .eq("barbearia_id", tenant?.id)
         .limit(1);
 
       if (clientesExistentes && clientesExistentes.length > 0) {
@@ -213,48 +295,56 @@ export function Agendamento() {
       } else {
         // 2. Inserir novo cliente
         const { data: novoCliente, error: errInsert } = await supabase
-          .from('clientes')
-          .insert([{ nome: clienteNome, telefone: clienteTelefone }])
-          .select('id')
+          .from("clientes")
+          .insert([
+            {
+              barbearia_id: tenant?.id,
+              nome: clienteNome,
+              telefone: clienteTelefone,
+            },
+          ])
+          .select("id")
           .single();
-        
+
         if (errInsert) throw errInsert;
         clienteId = novoCliente?.id;
       }
 
-      if (!clienteId) throw new Error('Falha ao obter ID do cliente');
+      if (!clienteId) throw new Error("Falha ao obter ID do cliente");
 
       // 3. Inserir agendamento
-      const dataStr = format(dataSelecionada, 'yyyy-MM-dd');
-      
-      const carrinhoParaBanco = servicosSelecionados.map(s => ({
+      const dataStr = format(dataSelecionada, "yyyy-MM-dd");
+
+      const carrinhoParaBanco = servicosSelecionados.map((s) => ({
         id: s.id,
         nome: s.nome,
-        valor: s.valor
+        valor: s.valor,
       }));
 
-      const { error: errAgenda } = await supabase
-        .from('agenda')
-        .insert([{
+      const { error: errAgenda } = await supabase.from("agenda").insert([
+        {
+          barbearia_id: tenant?.id,
           data: dataStr,
           horario: horaSelecionada,
           cliente_id: clienteId,
           barbeiro_id: barbeiroSelecionado?.id,
-          servico_id: servicosSelecionados.length > 0 ? servicosSelecionados[0].id : null,
-          carrinho_servicos: carrinhoParaBanco
-        }]);
+          servico_id:
+            servicosSelecionados.length > 0 ? servicosSelecionados[0].id : null,
+          carrinho_servicos: carrinhoParaBanco,
+        },
+      ]);
 
       if (errAgenda) throw errAgenda;
       // Dispara o evento de Conversão para o Pixel do Facebook
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'Schedule');
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Schedule");
       }
 
       // 4. Ir para sucesso
       setStep(5);
     } catch (err) {
       console.error(err);
-      setError('Ocorreu um erro ao agendar. Tente novamente.');
+      setError("Ocorreu um erro ao agendar. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -265,10 +355,15 @@ export function Agendamento() {
       {step < 5 && (
         <div className="flex justify-between items-center mb-8">
           {step > 1 && step < 5 ? (
-            <button onClick={() => setStep(step - 1)} className="text-[var(--color-nordik-gold-dim)] hover:text-white p-2">
+            <button
+              onClick={() => setStep(step - 1)}
+              className="text-[var(--color-nordik-gold-dim)] hover:text-white p-2"
+            >
               <ChevronLeft />
             </button>
-          ) : <div className="w-10"></div>}
+          ) : (
+            <div className="w-10"></div>
+          )}
           <div className="text-[var(--color-nordik-gold)] font-cinzel tracking-widest uppercase text-sm">
             Passo {step} de 4
           </div>
@@ -279,22 +374,34 @@ export function Agendamento() {
       {/* PASSO 1: BARBEIRO */}
       {step === 1 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-md mx-auto">
-          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Escolha o Profissional</h2>
+          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">
+            Escolha o Profissional
+          </h2>
           <div className="space-y-3">
-            {barbeiros.map(b => (
+            {barbeiros.map((b) => (
               <button
                 key={b.id}
-                onClick={() => { setBarbeiroSelecionado(b); setStep(2); }}
+                onClick={() => {
+                  setBarbeiroSelecionado(b);
+                  setStep(2);
+                }}
                 className="w-full bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-4 flex items-center gap-4 hover:border-[var(--color-nordik-gold)] transition-colors text-left"
               >
                 <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center border border-[var(--color-nordik-gold-dim)] text-[var(--color-nordik-gold)]">
                   <User size={20} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">{b.nome}</h3>
-                  <p className="text-[var(--color-nordik-gold-dim)] text-xs uppercase tracking-widest mt-1">Especialista</p>
+                  <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">
+                    {b.nome}
+                  </h3>
+                  <p className="text-[var(--color-nordik-gold-dim)] text-xs uppercase tracking-widest mt-1">
+                    Especialista
+                  </p>
                 </div>
-                <ChevronRight className="text-[var(--color-nordik-gold-dim)]" size={16} />
+                <ChevronRight
+                  className="text-[var(--color-nordik-gold-dim)]"
+                  size={16}
+                />
               </button>
             ))}
           </div>
@@ -304,48 +411,68 @@ export function Agendamento() {
       {/* PASSO 2: SERVIÇO */}
       {step === 2 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col w-full max-w-md mx-auto">
-          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Qual Serviço?</h2>
+          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">
+            Qual Serviço?
+          </h2>
           <div className="space-y-3 flex-1 overflow-y-auto pb-24 w-full">
-            {servicos.filter(s => !s.exclusivo_pm || isPmValido).map(s => {
-              const isSelected = servicosSelecionados.some(sel => sel.id === s.id);
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => {
-                    if (isSelected) {
-                      setServicosSelecionados(prev => prev.filter(sel => sel.id !== s.id));
-                    } else {
-                      setServicosSelecionados(prev => [...prev, s]);
-                    }
-                  }}
-                  className={`w-full bg-[var(--color-nordik-panel)] border p-4 flex items-center justify-between transition-colors text-left ${isSelected ? 'border-[var(--color-nordik-gold)]' : 'border-[var(--color-nordik-border)] hover:border-[var(--color-nordik-gold-dim)]'}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-sm border flex items-center justify-center transition-colors ${isSelected ? 'bg-[var(--color-nordik-gold)] border-[var(--color-nordik-gold)]' : 'border-[var(--color-nordik-gold-dim)]'}`}>
-                      {isSelected && <CheckCircle2 size={14} className="text-black" />}
+            {servicos
+              .filter((s) => !s.exclusivo_pm || isPmValido)
+              .map((s) => {
+                const isSelected = servicosSelecionados.some(
+                  (sel) => sel.id === s.id,
+                );
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      if (isSelected) {
+                        setServicosSelecionados((prev) =>
+                          prev.filter((sel) => sel.id !== s.id),
+                        );
+                      } else {
+                        setServicosSelecionados((prev) => [...prev, s]);
+                      }
+                    }}
+                    className={`w-full bg-[var(--color-nordik-panel)] border p-4 flex items-center justify-between transition-colors text-left ${isSelected ? "border-[var(--color-nordik-gold)]" : "border-[var(--color-nordik-border)] hover:border-[var(--color-nordik-gold-dim)]"}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-5 h-5 rounded-sm border flex items-center justify-center transition-colors ${isSelected ? "bg-[var(--color-nordik-gold)] border-[var(--color-nordik-gold)]" : "border-[var(--color-nordik-gold-dim)]"}`}
+                      >
+                        {isSelected && (
+                          <CheckCircle2 size={14} className="text-black" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">
+                          {s.nome}
+                          {s.nome_nordik && (
+                            <span className="text-[10px] text-[var(--color-nordik-gold-dim)] block opacity-80 mt-1">
+                              {s.nome_nordik}
+                            </span>
+                          )}
+                        </h3>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-[var(--color-nordik-gold-light)] font-bold uppercase tracking-widest text-sm">
-                        {s.nome}
-                        {s.nome_nordik && <span className="text-[10px] text-[var(--color-nordik-gold-dim)] block opacity-80 mt-1">{s.nome_nordik}</span>}
-                      </h3>
+                    <div className="text-[var(--color-nordik-gold)] font-bold">
+                      R$ {s.valor.toFixed(2)}
                     </div>
-                  </div>
-                  <div className="text-[var(--color-nordik-gold)] font-bold">
-                    R$ {s.valor.toFixed(2)}
-                  </div>
-                </button>
-              );
-            })}
-            
+                  </button>
+                );
+              })}
+
             {/* Botão Convênio PM */}
             {!isPmValido && (
-              <button 
+              <button
                 onClick={() => setShowPmModal(true)}
                 className="w-full bg-black border border-[var(--color-nordik-gold-dim)]/30 p-4 mt-6 flex items-center justify-center gap-2 hover:border-[var(--color-nordik-gold)]/60 transition-colors"
               >
-                <span className="text-[var(--color-nordik-gold)] text-lg">🚓</span>
-                <span className="text-[10px] text-[var(--color-nordik-gold-light)] uppercase tracking-widest font-bold">Sou Policial Militar / Ativar Convênio</span>
+                <span className="text-[var(--color-nordik-gold)] text-lg">
+                  🚓
+                </span>
+                <span className="text-[10px] text-[var(--color-nordik-gold-light)] uppercase tracking-widest font-bold">
+                  Sou Policial Militar / Ativar Convênio
+                </span>
               </button>
             )}
           </div>
@@ -358,7 +485,12 @@ export function Agendamento() {
                 className="w-full bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-4 px-6 flex items-center justify-between transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 <span>Continuar</span>
-                <span>R$ {servicosSelecionados.reduce((acc, curr) => acc + curr.valor, 0).toFixed(2)}</span>
+                <span>
+                  R${" "}
+                  {servicosSelecionados
+                    .reduce((acc, curr) => acc + curr.valor, 0)
+                    .toFixed(2)}
+                </span>
               </button>
             </div>
           </div>
@@ -368,21 +500,29 @@ export function Agendamento() {
       {/* PASSO 3: DATA E HORA */}
       {step === 3 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 w-full max-w-2xl mx-auto">
-          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Data e Horário</h2>
-          
+          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">
+            Data e Horário
+          </h2>
+
           {/* Seletor de Data Horizontal */}
           <div className="flex overflow-x-auto gap-3 pb-4 mb-6 snap-x hide-scrollbar">
-            {diasDisponiveis.map(data => {
+            {diasDisponiveis.map((data) => {
               const selecionado = data.getTime() === dataSelecionada.getTime();
               return (
                 <button
                   key={data.toISOString()}
                   onClick={() => setDataSelecionada(data)}
-                  className={`snap-center shrink-0 w-20 p-3 flex flex-col items-center justify-center border transition-colors ${selecionado ? 'bg-[var(--color-nordik-gold-dark)] border-[var(--color-nordik-gold)] text-black' : 'bg-[#111] border-[var(--color-nordik-border)] text-[var(--color-nordik-gold-dim)]'}`}
+                  className={`snap-center shrink-0 w-20 p-3 flex flex-col items-center justify-center border transition-colors ${selecionado ? "bg-[var(--color-nordik-gold-dark)] border-[var(--color-nordik-gold)] text-black" : "bg-[#111] border-[var(--color-nordik-border)] text-[var(--color-nordik-gold-dim)]"}`}
                 >
-                  <span className="text-[10px] uppercase tracking-widest mb-1 font-bold">{format(data, 'EEE', { locale: ptBR })}</span>
-                  <span className="text-xl font-bold">{format(data, 'dd')}</span>
-                  <span className="text-[10px] uppercase">{format(data, 'MMM', { locale: ptBR })}</span>
+                  <span className="text-[10px] uppercase tracking-widest mb-1 font-bold">
+                    {format(data, "EEE", { locale: ptBR })}
+                  </span>
+                  <span className="text-xl font-bold">
+                    {format(data, "dd")}
+                  </span>
+                  <span className="text-[10px] uppercase">
+                    {format(data, "MMM", { locale: ptBR })}
+                  </span>
                 </button>
               );
             })}
@@ -391,38 +531,47 @@ export function Agendamento() {
           {/* Seletor de Hora */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {loading ? (
-              <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">Carregando horários...</p>
-            ) : (() => {
-              const horariosBase = gerarHorariosBase();
-              const duracaoTotal = calcularDuracaoTotal();
-              const slotsNecessarios = Math.ceil(duracaoTotal / 30);
-              
-              return horariosBase.map((h, index) => {
-                let ocupado = false;
-                // Verifica se este slot ou os slots seguintes necessários estão ocupados
-                for (let i = 0; i < slotsNecessarios; i++) {
-                  const slotIndex = index + i;
-                  if (slotIndex < horariosBase.length) {
-                    if (horariosOcupados.includes(horariosBase[slotIndex].hora)) {
-                      ocupado = true;
-                      break;
+              <p className="col-span-3 text-center text-[var(--color-nordik-gold-dim)] text-sm py-8">
+                Carregando horários...
+              </p>
+            ) : (
+              (() => {
+                const horariosBase = gerarHorariosBase();
+                const duracaoTotal = calcularDuracaoTotal();
+                const slotsNecessarios = Math.ceil(duracaoTotal / 30);
+
+                return horariosBase.map((h, index) => {
+                  let ocupado = false;
+                  // Verifica se este slot ou os slots seguintes necessários estão ocupados
+                  for (let i = 0; i < slotsNecessarios; i++) {
+                    const slotIndex = index + i;
+                    if (slotIndex < horariosBase.length) {
+                      if (
+                        horariosOcupados.includes(horariosBase[slotIndex].hora)
+                      ) {
+                        ocupado = true;
+                        break;
+                      }
                     }
                   }
-                }
-                
-                const selecionado = horaSelecionada === h.hora;
-                return (
-                  <button
-                    key={h.hora}
-                    disabled={ocupado}
-                    onClick={() => { setHoraSelecionada(h.hora); setStep(4); }}
-                    className={`py-3 text-sm font-bold tracking-widest transition-colors border ${ocupado ? 'opacity-20 border-[var(--color-nordik-border)] cursor-not-allowed bg-transparent text-white' : selecionado ? 'bg-[var(--color-nordik-gold)] text-black border-[var(--color-nordik-gold)]' : 'bg-black text-[var(--color-nordik-gold-light)] border-[var(--color-nordik-border)] hover:border-[var(--color-nordik-gold-dim)]'}`}
-                  >
-                    {h.hora}
-                  </button>
-                )
-              })
-            })()}
+
+                  const selecionado = horaSelecionada === h.hora;
+                  return (
+                    <button
+                      key={h.hora}
+                      disabled={ocupado}
+                      onClick={() => {
+                        setHoraSelecionada(h.hora);
+                        setStep(4);
+                      }}
+                      className={`py-3 text-sm font-bold tracking-widest transition-colors border ${ocupado ? "opacity-20 border-[var(--color-nordik-border)] cursor-not-allowed bg-transparent text-white" : selecionado ? "bg-[var(--color-nordik-gold)] text-black border-[var(--color-nordik-gold)]" : "bg-black text-[var(--color-nordik-gold-light)] border-[var(--color-nordik-border)] hover:border-[var(--color-nordik-gold-dim)]"}`}
+                    >
+                      {h.hora}
+                    </button>
+                  );
+                });
+              })()
+            )}
           </div>
         </div>
       )}
@@ -430,40 +579,67 @@ export function Agendamento() {
       {/* PASSO 4: CONFIRMAÇÃO */}
       {step === 4 && (
         <div className="animate-in fade-in slide-in-from-right-4 duration-300 flex-1 flex flex-col w-full max-w-md mx-auto">
-          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">Seus Dados</h2>
-          
+          <h2 className="text-xl text-white mb-6 font-cinzel tracking-widest text-center">
+            Seus Dados
+          </h2>
+
           <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] p-6 mb-6 space-y-3">
-            <p className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)]">Resumo da Reserva</p>
+            <p className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)]">
+              Resumo da Reserva
+            </p>
             <div className="space-y-2 mb-3 pb-3 border-b border-[var(--color-nordik-border)]/50">
-              {servicosSelecionados.map(s => (
-                <div key={s.id} className="flex justify-between items-center text-white text-sm">
+              {servicosSelecionados.map((s) => (
+                <div
+                  key={s.id}
+                  className="flex justify-between items-center text-white text-sm"
+                >
                   <span className="font-bold">{s.nome}</span>
-                  <span className="text-[var(--color-nordik-gold)]">R$ {s.valor.toFixed(2)}</span>
+                  <span className="text-[var(--color-nordik-gold)]">
+                    R$ {s.valor.toFixed(2)}
+                  </span>
                 </div>
               ))}
               <div className="flex justify-between items-center text-white pt-2 font-bold text-lg">
                 <span>Total</span>
-                <span className="text-[var(--color-nordik-gold)]">R$ {servicosSelecionados.reduce((acc, curr) => acc + curr.valor, 0).toFixed(2)}</span>
+                <span className="text-[var(--color-nordik-gold)]">
+                  R${" "}
+                  {servicosSelecionados
+                    .reduce((acc, curr) => acc + curr.valor, 0)
+                    .toFixed(2)}
+                </span>
               </div>
             </div>
-            <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2"><User size={14}/> {barbeiroSelecionado?.nome}</p>
-            <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2"><CalendarIcon size={14}/> {format(dataSelecionada, 'dd/MM/yyyy')} às {horaSelecionada}</p>
+            <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2">
+              <User size={14} /> {barbeiroSelecionado?.nome}
+            </p>
+            <p className="text-sm text-[var(--color-nordik-gold-light)] flex items-center gap-2">
+              <CalendarIcon size={14} /> {format(dataSelecionada, "dd/MM/yyyy")}{" "}
+              às {horaSelecionada}
+            </p>
           </div>
 
           <div className="space-y-4 flex-1">
-            {error && <div className="text-red-500 text-sm mb-4 text-center">{error}</div>}
+            {error && (
+              <div className="text-red-500 text-sm mb-4 text-center">
+                {error}
+              </div>
+            )}
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Seu Nome</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">
+                Seu Nome
+              </label>
               <input
                 type="text"
                 value={clienteNome}
-                onChange={e => setClienteNome(e.target.value)}
+                onChange={(e) => setClienteNome(e.target.value)}
                 placeholder="Ex: João Silva"
                 className="w-full bg-black border border-[var(--color-nordik-border)] px-4 py-4 text-white focus:border-[var(--color-nordik-gold)] focus:outline-none transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Seu WhatsApp</label>
+              <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">
+                Seu WhatsApp
+              </label>
               <input
                 type="tel"
                 value={clienteTelefone}
@@ -479,7 +655,7 @@ export function Agendamento() {
             disabled={loading}
             className="mt-8 bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Confirmando...' : 'Confirmar Agendamento'}
+            {loading ? "Confirmando..." : "Confirmar Agendamento"}
           </button>
         </div>
       )}
@@ -488,13 +664,13 @@ export function Agendamento() {
       {step === 5 && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center text-center p-8">
           {/* Fundo com a imagem gerada */}
-          <div 
+          <div
             className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
             style={{ backgroundImage: "url('/bg-premium.png')" }}
           />
           {/* Gradiente para focar o texto */}
           <div className="absolute inset-0 z-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
-          
+
           <div className="relative z-10 animate-in zoom-in-95 duration-1000 flex flex-col items-center space-y-6 w-full max-w-md mx-auto">
             <div className="w-20 h-20 bg-[var(--color-nordik-gold-dark)] rounded-full flex items-center justify-center text-black mb-4 shadow-[0_0_40px_rgba(202,165,101,0.5)]">
               <CheckCircle2 size={40} />
@@ -503,19 +679,23 @@ export function Agendamento() {
               Horário Confirmado
             </h2>
             <p className="text-[15px] text-white/90 max-w-[280px] mx-auto leading-relaxed">
-              O seu lugar na cadeira já está garantido para dia <strong className="text-[var(--color-nordik-gold-light)]">{format(dataSelecionada, 'dd/MM')} às {horaSelecionada}</strong>.
+              O seu lugar na cadeira já está garantido para dia{" "}
+              <strong className="text-[var(--color-nordik-gold-light)]">
+                {format(dataSelecionada, "dd/MM")} às {horaSelecionada}
+              </strong>
+              .
             </p>
             <div className="w-full pt-12 space-y-4">
-              <a 
-                href={`https://wa.me/5566999888986?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map(s => s.nome).join(', ')} no dia ${format(dataSelecionada, 'dd/MM')} às ${horaSelecionada}!`}
+              <a
+                href={`https://wa.me/5566999888986?text=Olá Nørdik! Acabei de agendar meu horário para o(s) serviço(s) de ${servicosSelecionados.map((s) => s.nome).join(", ")} no dia ${format(dataSelecionada, "dd/MM")} às ${horaSelecionada}!`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors shadow-lg shadow-[#25D366]/20"
               >
                 Confirmar pelo WhatsApp
               </a>
-              <button 
-                onClick={() => window.location.href = '/'}
+              <button
+                onClick={() => (window.location.href = "/")}
                 className="bg-transparent border border-[var(--color-nordik-gold-dark)] text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold)] hover:text-black hover:border-[var(--color-nordik-gold)] font-bold uppercase tracking-widest py-5 px-6 w-full transition-all backdrop-blur-sm"
               >
                 Voltar ao Início
@@ -524,25 +704,30 @@ export function Agendamento() {
           </div>
         </div>
       )}
-      
+
       {/* Modal PM */}
       {showPmModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-[var(--color-nordik-panel)] border border-[var(--color-nordik-border)] w-full max-w-sm p-6 relative animate-in zoom-in-95 duration-200">
-            <button 
+            <button
               onClick={() => setShowPmModal(false)}
               className="absolute top-4 right-4 text-[var(--color-nordik-gold-dim)] hover:text-white"
             >
               ✕
             </button>
-            <h3 className="text-[var(--color-nordik-gold)] font-cinzel text-lg uppercase tracking-widest mb-2 text-center">Convênio PM</h3>
+            <h3 className="text-[var(--color-nordik-gold)] font-cinzel text-lg uppercase tracking-widest mb-2 text-center">
+              Convênio PM
+            </h3>
             <p className="text-white/70 text-xs text-center mb-6 leading-relaxed">
-              Informe seus dados para validar o acesso ao Plano NØRDIK exclusivo para policiais militares.
+              Informe seus dados para validar o acesso ao Plano NØRDIK exclusivo
+              para policiais militares.
             </p>
-            
+
             <form onSubmit={handlePmSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Seu WhatsApp</label>
+                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">
+                  Seu WhatsApp
+                </label>
                 <input
                   type="tel"
                   value={pmTelefone}
@@ -552,22 +737,29 @@ export function Agendamento() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">Matrícula / Funcional <span className="text-white/40">(Apenas 1º acesso)</span></label>
+                <label className="block text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] mb-2">
+                  Matrícula / Funcional{" "}
+                  <span className="text-white/40">(Apenas 1º acesso)</span>
+                </label>
                 <input
                   type="text"
                   value={pmMatricula}
-                  onChange={e => setPmMatricula(e.target.value)}
+                  onChange={(e) => setPmMatricula(e.target.value)}
                   placeholder="Deixe em branco se já validou antes"
                   className="w-full bg-black border border-[var(--color-nordik-border)] px-4 py-3 text-white focus:border-[var(--color-nordik-gold)] focus:outline-none transition-colors text-sm"
                 />
               </div>
-              
+
               {pmMsg.text && (
-                <div className={`p-3 text-xs border leading-relaxed ${
-                  pmMsg.type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                  pmMsg.type === 'success' ? 'bg-[#25D366]/10 border-[#25D366]/30 text-[#25D366]' :
-                  'bg-yellow-500/10 border-yellow-500/30 text-yellow-500'
-                }`}>
+                <div
+                  className={`p-3 text-xs border leading-relaxed ${
+                    pmMsg.type === "error"
+                      ? "bg-red-500/10 border-red-500/30 text-red-400"
+                      : pmMsg.type === "success"
+                        ? "bg-[#25D366]/10 border-[#25D366]/30 text-[#25D366]"
+                        : "bg-yellow-500/10 border-yellow-500/30 text-yellow-500"
+                  }`}
+                >
                   {pmMsg.text}
                 </div>
               )}
@@ -577,13 +769,12 @@ export function Agendamento() {
                 disabled={pmLoading}
                 className="mt-4 bg-transparent border border-[var(--color-nordik-gold)] text-[var(--color-nordik-gold)] hover:bg-[var(--color-nordik-gold)] hover:text-black font-bold uppercase tracking-widest py-3 px-6 w-full flex items-center justify-center transition-colors disabled:opacity-50 text-xs"
               >
-                {pmLoading ? 'Verificando...' : 'Validar Acesso'}
+                {pmLoading ? "Verificando..." : "Validar Acesso"}
               </button>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
