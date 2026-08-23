@@ -110,15 +110,9 @@ function Layout({ children }: { children: React.ReactNode }) {
 function Home() {
   const { tenant } = useTenant();
   const agendamentoAtivo = tenant?.configuracoes?.agendamento_ativo !== "false";
-  const whatsUrl =
-    tenant?.configuracoes?.whatsapp_url ||
-    "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21";
-  const mapsUrl =
-    tenant?.configuracoes?.endereco_maps ||
-    "https://maps.google.com/?q=R.+Astorga,+244+-+Módulo+05,+Juína+-+MT";
-  const enderecoTexto =
-    tenant?.configuracoes?.endereco_texto ||
-    "R. Astorga, 244 - Módulo 05\nJuína - MT";
+  const whatsUrl = tenant?.configuracoes?.whatsapp_url || "";
+  const mapsUrl = tenant?.configuracoes?.endereco_maps || "";
+  const enderecoTexto = tenant?.configuracoes?.endereco_texto || "";
 
   const [planos, setPlanos] = useState<
     {
@@ -215,26 +209,32 @@ function Home() {
             )}
           </Link>
 
-          <div className="grid grid-cols-2 gap-3">
-            <a
-              href={whatsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366]/10 hover:border-[#25D366] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
-            >
-              <MessageCircle size={16} />
-              WhatsApp
-            </a>
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold-dim)]/10 hover:border-[var(--color-nordik-gold)] hover:text-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
-            >
-              <MapPin size={16} />
-              Localização
-            </a>
-          </div>
+          {(whatsUrl || mapsUrl) && (
+            <div className={`grid gap-3 ${whatsUrl && mapsUrl ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {whatsUrl && (
+                <a
+                  href={whatsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-[#25D366]/50 text-[#25D366] hover:bg-[#25D366]/10 hover:border-[#25D366] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
+                >
+                  <MessageCircle size={16} />
+                  WhatsApp
+                </a>
+              )}
+              {mapsUrl && (
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border border-[var(--color-nordik-gold-dim)]/50 text-[var(--color-nordik-gold-light)] hover:bg-[var(--color-nordik-gold-dim)]/10 hover:border-[var(--color-nordik-gold)] hover:text-[var(--color-nordik-gold)] bg-black/40 backdrop-blur-sm font-bold uppercase tracking-widest py-3 px-2 w-full flex items-center justify-center gap-2 transition-colors text-[10px] md:text-xs text-center"
+                >
+                  <MapPin size={16} />
+                  Localização
+                </a>
+              )}
+            </div>
+          )}
 
           {planos.length > 0 && (
             <button
@@ -450,32 +450,34 @@ function Home() {
         })()}
 
       {/* 5. LOCALIZAÇÃO */}
-      <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
-        <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
-          Localização
-        </h2>
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-col items-center gap-4 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] transition-colors group"
-        >
-          <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center text-[var(--color-nordik-gold)] group-hover:bg-[var(--color-nordik-gold)] group-hover:text-black transition-all">
-            <MapPin size={24} />
-          </div>
-          <span className="text-[13px] leading-relaxed max-w-sm">
-            {enderecoTexto.split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                <br />
-              </span>
-            ))}
-          </span>
-          <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold group-hover:text-[var(--color-nordik-gold)]">
-            Abrir no Google Maps
-          </span>
-        </a>
-      </section>
+      {mapsUrl && enderecoTexto && (
+        <section className="py-16 px-8 text-center flex flex-col items-center border-t border-[var(--color-nordik-gold-dim)]/20">
+          <h2 className="font-cinzel text-2xl text-[var(--color-nordik-gold)] tracking-[3px] uppercase mb-8">
+            Localização
+          </h2>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-4 text-[var(--color-nordik-gold-light)] hover:text-[var(--color-nordik-gold)] transition-colors group"
+          >
+            <div className="w-14 h-14 rounded-full border border-[var(--color-nordik-gold)] flex items-center justify-center text-[var(--color-nordik-gold)] group-hover:bg-[var(--color-nordik-gold)] group-hover:text-black transition-all">
+              <MapPin size={24} />
+            </div>
+            <span className="text-[13px] leading-relaxed max-w-sm">
+              {enderecoTexto.split("\n").map((line, i) => (
+                <span key={i}>
+                  {line}
+                  <br />
+                </span>
+              ))}
+            </span>
+            <span className="text-[10px] uppercase tracking-widest text-[var(--color-nordik-gold-dim)] font-bold group-hover:text-[var(--color-nordik-gold)]">
+              Abrir no Google Maps
+            </span>
+          </a>
+        </section>
+      )}
 
       {/* 6. CTA FINAL */}
       <section className="px-8 mt-4 mb-4">
