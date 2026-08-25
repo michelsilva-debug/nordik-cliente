@@ -46,45 +46,27 @@ export function Vip() {
   const fetchClienteData = async (id: string) => {
     setLoading(true);
     try {
-      // 1. Busca dados do cliente
-      const { data: cData, error: cErr } = await supabase
-        .from('clientes')
-        .select('*')
-        .eq('id', id)
-        .eq('barbearia_id', tenant?.id)
-        .single();
-        
-      if (cErr || !cData) {
+      const { data: vipData, error: vipErr } = await supabase.rpc('rpc_get_vip_data', {
+        p_cliente_id: id,
+        p_barbearia_id: tenant?.id
+      });
+      
+      if (vipErr || !vipData) {
         localStorage.removeItem(`@${tenant?.slug}:clienteId`);
         setCliente(null);
         setLoading(false);
         return;
       }
       
-      setCliente(cData);
+      setCliente(vipData.cliente);
       
-      // 1.5 Busca assinatura ativa do cliente
-      const { data: assData } = await supabase
-        .from('assinaturas')
-        .select('*, planos(*)')
-        .eq('cliente_id', id)
-        .eq('status', 'ativo')
-        .eq('barbearia_id', tenant?.id)
-        .maybeSingle();
+      if (vipData.assinatura) {
+        setAssinatura(vipData.assinatura);
+      }
       
-      if (assData) setAssinatura(assData);
-      
-      // 2. Busca histórico de agendamentos
-      const { data: hData } = await supabase
-        .from('agenda')
-        .select('*, servicos(*), barbeiros(*)')
-        .eq('cliente_id', id)
-        .eq('barbearia_id', tenant?.id)
-        .order('data', { ascending: false })
-        .order('horario', { ascending: false })
-        .limit(5); // Últimos 5 cortes
-        
-      if (hData) setHistorico(hData);
+      if (vipData.historico) {
+        setHistorico(vipData.historico);
+      }
       
     } catch (err) {
       console.error(err);
@@ -120,35 +102,19 @@ export function Vip() {
     setError('');
 
     try {
-      // Verifica se existe
-      const { data: existentes } = await supabase
-        .from('clientes')
-        .select('id, nome, pontos_fidelidade')
-        .eq('telefone', telefone)
-        .eq('barbearia_id', tenant?.id)
-        .limit(1);
+      // Usa a RPC segura para logar/criar o cliente
+      const { data: clienteId, error: errLogin } = await supabase.rpc('rpc_login_vip', {
+        p_telefone: telefone,
+        p_nome: nome,
+        p_barbearia_id: tenant?.id
+      });
 
-      let clienteId = null;
-
-      if (existentes && existentes.length > 0) {
-        clienteId = existentes[0].id;
-        // Opcional: Atualizar nome caso tenha digitado diferente, 
-        // mas vamos apenas logar para manter simples.
-      } else {
-        // Criar novo
-        const { data: novo, error: errInsert } = await supabase
-          .from('clientes')
-          .insert([{ barbearia_id: tenant?.id, nome, telefone, pontos_fidelidade: 0 }])
-          .select('id')
-          .single();
-          
-        if (errInsert) throw errInsert;
-        clienteId = novo?.id;
+      if (errLogin || !clienteId) {
+        throw errLogin || new Error("Falha no login");
       }
 
-      if (clienteId) {
-        localStorage.setItem(`@${tenant?.slug}:clienteId`, clienteId);
-        await fetchClienteData(clienteId);
+      localStorage.setItem(`@${tenant?.slug}:clienteId`, clienteId);
+      await fetchClienteData(clienteId);
       }
     } catch {
       setError('Ocorreu um erro ao acessar. Tente novamente.');
