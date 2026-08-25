@@ -115,9 +115,9 @@ export function Vip() {
 
       localStorage.setItem(`@${tenant?.slug}:clienteId`, clienteId);
       await fetchClienteData(clienteId);
-      }
-    } catch {
-      setError('Ocorreu um erro ao acessar. Tente novamente.');
+    } catch (err: any) {
+      console.error(err);
+      setError('Erro: ' + (err.message || err.details || JSON.stringify(err)));
       setLoading(false);
     }
   };
