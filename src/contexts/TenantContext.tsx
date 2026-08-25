@@ -63,7 +63,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         setTenant({
           id: barbearia.id,
           nome: barbearia.nome,
-          slug: barbearia.slug,
+          slug: slug,
           configuracoes
         });
       } catch (err: any) {
