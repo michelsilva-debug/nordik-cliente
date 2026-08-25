@@ -104,21 +104,15 @@ export function Agendamento() {
 
   useEffect(() => {
     async function fetchIniciais() {
-      const { data: bData } = await supabase
-        .from("barbeiros")
-        .select("id, nome")
-        .eq("barbearia_id", tenant?.id)
-        .order("nome");
-      if (bData) setBarbeiros(bData);
+      const { data: bData, error: bErr } = await supabase
+        .rpc("rpc_get_barbeiros", { p_barbearia_id: tenant?.id });
+      if (bErr) console.error("Erro barbeiros", bErr);
+      if (bData) setBarbeiros(bData as Barbeiro[]);
 
       const { data: sData, error: sErr } = await supabase
-        .from("servicos")
-        .select("id, nome, nome_nordik, valor, duracao_min, exclusivo_pm")
-        .eq("ativo", true)
-        .eq("barbearia_id", tenant?.id)
-        .order("nome");
-      if (sErr) console.error("Erro ao buscar servicos:", sErr);
-      if (sData) setServicos(sData);
+        .rpc("rpc_get_servicos", { p_barbearia_id: tenant?.id });
+      if (sErr) console.error("Erro serviços", sErr);
+      if (sData) setServicos(sData as Servico[]);
 
       // Verificação automática do PM via localStorage
       const savedPmPhone = localStorage.getItem(`@${tenant?.slug}:pm_phone`);

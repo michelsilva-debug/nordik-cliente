@@ -34,13 +34,11 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // Busca a barbearia pelo slug
-        const { data: barbearia, error: err } = await supabase
-          .from('barbearias')
-          .select('*')
-          .eq('slug', slug)
-          .eq('status', 'ativa')
-          .single();
+        // 1. Busca a barbearia pelo slug (Usando a nova RPC segura da Fase 4)
+        const { data: barbeariaData, error: err } = await supabase
+          .rpc('rpc_get_tenant_by_slug', { p_slug: slug });
+
+        const barbearia = barbeariaData?.[0];
 
         if (err || !barbearia) {
           console.error('Erro ao buscar barbearia:', err);
