@@ -122,14 +122,12 @@ export function Agendamento() {
 
       // Verificação automática do PM via localStorage
       const savedPmPhone = localStorage.getItem(`@${tenant?.slug}:pm_phone`);
-      if (savedPmPhone) {
-        const { data: pmData } = await supabase
-          .from("clientes")
-          .select("pm_status")
-          .eq("telefone", savedPmPhone)
-          .eq("barbearia_id", tenant?.id)
-          .limit(1);
-        if (pmData && pmData.length > 0 && pmData[0].pm_status === "aprovado") {
+      if (savedPmPhone && tenant?.id) {
+        const { data: pmStatus } = await supabase.rpc('rpc_processar_pm', {
+          p_telefone: savedPmPhone,
+          p_barbearia_id: tenant.id
+        });
+        if (pmStatus === "aprovado") {
           setIsPmValido(true);
         }
       }
@@ -142,11 +140,10 @@ export function Agendamento() {
       setLoading(true);
       const dataStr = format(dataSelecionada, "yyyy-MM-dd");
 
-      const { data: dataAgenda } = await supabase
-        .from("agenda")
-        .select("horario, servicos(duracao_min)")
-        .eq("data", dataStr)
-        .eq("barbearia_id", tenant?.id);
+      const { data: dataAgenda } = await supabase.rpc('rpc_get_horarios_ocupados', {
+        p_data: dataStr,
+        p_barbearia_id: tenant?.id
+      });
 
       if (dataAgenda) {
         const blocosOcupados = new Set<string>();
@@ -155,8 +152,8 @@ export function Agendamento() {
           const horaBase = d.horario.substring(0, 5);
           blocosOcupados.add(horaBase);
 
-          // @ts-ignore
-          const duracao = d.servicos?.duracao_min || 30;
+          // A nova RPC já retorna duracao_min
+          const duracao = (d as any).duracao_min || 30;
           if (duracao > 30) {
             const slotsExtras = Math.ceil(duracao / 30) - 1;
             let [h, m] = horaBase.split(":").map(Number);
@@ -210,69 +207,34 @@ export function Agendamento() {
     setPmMsg({ type: "", text: "" });
 
     try {
-      const { data } = await supabase
-        .from("clientes")
-        .select("id, pm_status")
-        .eq("telefone", pmTelefone)
-        .eq("barbearia_id", tenant?.id)
-        .limit(1);
+      const { data: status } = await supabase.rpc('rpc_processar_pm', {
+        p_telefone: pmTelefone,
+        p_barbearia_id: tenant?.id,
+        p_matricula: pmMatricula || null
+      });
 
-      if (data && data.length > 0) {
-        const cliente = data[0];
-        if (cliente.pm_status === "aprovado") {
-          setIsPmValido(true);
-          setShowPmModal(false);
-          localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
-        } else if (cliente.pm_status === "pendente") {
-          setPmMsg({
-            type: "warning",
-            text: "Sua matrícula já está em análise! Agende um corte normal e apresente a funcional na barbearia para aprovação.",
-          });
-        } else {
-          if (!pmMatricula) {
-            setPmMsg({
-              type: "error",
-              text: "Para o primeiro acesso, a matrícula é obrigatória.",
-            });
-            setPmLoading(false);
-            return;
-          }
-          await supabase
-            .from("clientes")
-            .update({ pm_matricula: pmMatricula, pm_status: "pendente" })
-            .eq("id", cliente.id);
-          setPmMsg({
-            type: "success",
-            text: "Matrícula recebida! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
-          });
-          localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
-        }
-      } else {
-        if (!pmMatricula) {
-          setPmMsg({
-            type: "error",
-            text: "Para o primeiro acesso, a matrícula é obrigatória.",
-          });
-          setPmLoading(false);
-          return;
-        }
-        await supabase
-          .from("clientes")
-          .insert([
-            {
-              barbearia_id: tenant?.id,
-              telefone: pmTelefone,
-              nome: "PM " + pmMatricula,
-              pm_matricula: pmMatricula,
-              pm_status: "pendente",
-              pontos_fidelidade: 0,
-            },
-          ]);
+      if (status === "aprovado") {
+        setIsPmValido(true);
+        setShowPmModal(false);
+        localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone);
+      } else if (status === "pendente_analise") {
+        setPmMsg({
+          type: "warning",
+          text: "Sua matrícula já está em análise! Agende um corte normal e apresente a funcional na barbearia para aprovação.",
+        });
+      } else if (status === "matricula_requirida") {
+        setPmMsg({
+          type: "error",
+          text: "Para o primeiro acesso, a matrícula é obrigatória.",
+        });
+        setPmLoading(false);
+        return;
+      } else if (status === "pendente_criado") {
         setPmMsg({
           type: "success",
-          text: "Cadastro criado! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
+          text: "Cadastro recebido! Agende um corte normal hoje. Apresente sua funcional na barbearia para liberar o desconto nos próximos cortes.",
         });
-        localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone); // Salva no celular
+        localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone);
       }
     } catch (err) {
       setPmMsg({ type: "error", text: "Erro de conexão. Tente novamente." });
@@ -289,38 +251,6 @@ export function Agendamento() {
     setError("");
 
     try {
-      // 1. Procurar se cliente já existe pelo telefone
-      let clienteId = null;
-      const { data: clientesExistentes } = await supabase
-        .from("clientes")
-        .select("id")
-        .eq("telefone", clienteTelefone)
-        .eq("barbearia_id", tenant?.id)
-        .limit(1);
-
-      if (clientesExistentes && clientesExistentes.length > 0) {
-        clienteId = clientesExistentes[0].id;
-      } else {
-        // 2. Inserir novo cliente
-        const { data: novoCliente, error: errInsert } = await supabase
-          .from("clientes")
-          .insert([
-            {
-              barbearia_id: tenant?.id,
-              nome: clienteNome,
-              telefone: clienteTelefone,
-            },
-          ])
-          .select("id")
-          .single();
-
-        if (errInsert) throw errInsert;
-        clienteId = novoCliente?.id;
-      }
-
-      if (!clienteId) throw new Error("Falha ao obter ID do cliente");
-
-      // 3. Inserir agendamento
       const dataStr = format(dataSelecionada, "yyyy-MM-dd");
 
       const carrinhoParaBanco = servicosSelecionados.map((s) => ({
@@ -329,20 +259,19 @@ export function Agendamento() {
         valor: s.valor,
       }));
 
-      const { error: errAgenda } = await supabase.from("agenda").insert([
-        {
-          barbearia_id: tenant?.id,
-          data: dataStr,
-          horario: horaSelecionada,
-          cliente_id: clienteId,
-          barbeiro_id: barbeiroSelecionado?.id,
-          servico_id:
-            servicosSelecionados.length > 0 ? servicosSelecionados[0].id : null,
-          carrinho_servicos: carrinhoParaBanco,
-        },
-      ]);
+      // Cria agendamento usando RPC de forma segura (sem acesso de leitura/escrita a clientes)
+      const { data: sucesso, error: errAgenda } = await supabase.rpc('rpc_criar_agendamento', {
+        p_barbearia_id: tenant?.id,
+        p_data: dataStr,
+        p_horario: horaSelecionada,
+        p_nome: clienteNome,
+        p_telefone: clienteTelefone,
+        p_barbeiro_id: barbeiroSelecionado?.id,
+        p_servico_id: servicosSelecionados.length > 0 ? servicosSelecionados[0].id : null,
+        p_carrinho_json: carrinhoParaBanco
+      });
 
-      if (errAgenda) throw errAgenda;
+      if (errAgenda || !sucesso) throw errAgenda || new Error("Falha ao criar agendamento");
       // Dispara o evento de Conversão para o Pixel do Facebook
       if (typeof window !== "undefined" && (window as any).fbq) {
         (window as any).fbq("track", "Schedule");
@@ -352,7 +281,8 @@ export function Agendamento() {
       setStep(5);
     } catch (err: any) {
       console.error("Erro ao agendar:", err);
-      setError("Ocorreu um erro ao agendar. Tente novamente.");
+      // Exibindo o erro real na tela para debug
+      setError("Erro: " + (err.message || err.details || JSON.stringify(err)));
     } finally {
       setLoading(false);
     }
