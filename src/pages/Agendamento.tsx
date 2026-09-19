@@ -65,6 +65,7 @@ export function Agendamento() {
   const [horaSelecionada, setHoraSelecionada] = useState<string | null>(null);
   const [clienteNome, setClienteNome] = useState("");
   const [clienteTelefone, setClienteTelefone] = useState("");
+  const [aceitaTermos, setAceitaTermos] = useState(false);
 
   // Geração de dias (próximos 30 dias úteis — sem domingos)
   const diasDisponiveis = Array.from({ length: 30 })
@@ -580,11 +581,24 @@ export function Agendamento() {
                 className="w-full bg-black border border-[var(--color-nordik-border)] px-4 py-4 text-white focus:border-[var(--color-nordik-gold)] focus:outline-none transition-colors"
               />
             </div>
+
+            <div className="flex items-start gap-3 mt-4">
+              <input
+                type="checkbox"
+                id="aceitaTermos"
+                checked={aceitaTermos}
+                onChange={(e) => setAceitaTermos(e.target.checked)}
+                className="mt-1 w-4 h-4 bg-black border border-[var(--color-nordik-border)] accent-[var(--color-nordik-gold)]"
+              />
+              <label htmlFor="aceitaTermos" className="text-xs text-[var(--color-nordik-gold-dim)] leading-tight">
+                Li e concordo com os Termos de Privacidade e autorizo o envio de confirmações e mensagens via WhatsApp.
+              </label>
+            </div>
           </div>
 
           <button
             onClick={confirmarAgendamento}
-            disabled={loading}
+            disabled={loading || !aceitaTermos}
             className="mt-8 bg-[var(--color-nordik-gold-dark)] hover:bg-[var(--color-nordik-gold)] text-black font-bold uppercase tracking-widest py-5 px-6 w-full flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
           >
             {loading ? "Confirmando..." : "Confirmar Agendamento"}
