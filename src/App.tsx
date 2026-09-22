@@ -14,6 +14,7 @@ import { supabase } from "./lib/supabase";
 import { Agendamento } from "./pages/Agendamento";
 import { TenantProvider } from "./contexts/TenantContext";
 import { useTenant } from "./hooks/useTenant";
+import { safeUrl } from "./lib/url";
 import { Vip } from "./pages/Vip";
 
 // Ícone do Instagram (SVG inline, pois lucide-react não exporta Instagram nesta versão)
@@ -40,9 +41,9 @@ function InstagramIcon({ size = 24 }: { size?: number }) {
 // Layout Base
 function Layout({ children }: { children: React.ReactNode }) {
   const { tenant } = useTenant();
-  const logoUrl = tenant?.configuracoes?.logo_url || "/logo.png";
+  const logoUrl = safeUrl(tenant?.configuracoes?.logo_url) || "/logo.png";
   const instaUrl =
-    tenant?.configuracoes?.instagram_url ||
+    safeUrl(tenant?.configuracoes?.instagram_url) ||
     (tenant?.slug === "nordik" ? "https://www.instagram.com/invites/contact/?igsh=1k0vumpjjbvi3&utm_content=5rhyht7" : "");
   return (
     <div className="min-h-screen flex flex-col w-full max-w-[448px] md:max-w-[900px] lg:max-w-[1200px] mx-auto bg-black md:shadow-[0_0_50px_rgba(0,0,0,0.8)] relative border-x border-[var(--color-nordik-border)] transition-all duration-500 overflow-hidden">
@@ -123,7 +124,7 @@ function Home() {
     formatWhatsAppUrl(tenant?.configuracoes?.whatsapp_url) ||
     (tenant?.slug === "nordik" ? "https://wa.me/5566999888986?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20hor%C3%A1rio%21" : "");
   const mapsUrl =
-    tenant?.configuracoes?.endereco_maps ||
+    safeUrl(tenant?.configuracoes?.endereco_maps) ||
     (tenant?.slug === "nordik" ? "https://maps.google.com/?q=R.+Astorga,+244+-+Módulo+05,+Juína+-+MT" : "");
   const enderecoTexto =
     tenant?.configuracoes?.endereco_texto ||
