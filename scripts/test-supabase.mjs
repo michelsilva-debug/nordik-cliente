@@ -1,7 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
-const supabaseUrl = 'https://lursrpxvzrynibdpezme.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1cnNycHh2enJ5bmliZHBlem1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MzI5NDQsImV4cCI6MjA5NjEwODk0NH0.6Taso0ye8Bnl8ixDGTeuUrx9kj2bi61iqXxGFdCtuqg';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// AVISO: script histórico de correção pontual (fix de um registro de
+// cliente duplicado), com IDs e telefone reais gravados no código.
+// Já foi executado em produção; mantido aqui só como registro do que
+// foi feito. Não deve ser rodado novamente e é um bom candidato a
+// remoção/expurgo do histórico do git (contém PII de cliente).
+import { createSupabaseClientFromEnv } from './_env.mjs';
+
+const supabase = await createSupabaseClientFromEnv();
 
 async function fixData() {
   // 1. Mover agendamento do Michel duplicado para o Michel original

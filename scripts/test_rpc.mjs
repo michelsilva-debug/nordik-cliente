@@ -1,18 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
+import { createSupabaseClientFromEnv } from './_env.mjs';
 
-const envPath = path.resolve(process.cwd(), '.env');
-const envContent = fs.readFileSync(envPath, 'utf-8');
-const envVars = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^([^=]+)=(.*)$/);
-  if (match) {
-    envVars[match[1]] = match[2].replace('\r', '');
-  }
-});
-
-const supabase = createClient(envVars.VITE_SUPABASE_URL, envVars.VITE_SUPABASE_ANON_KEY);
+const supabase = await createSupabaseClientFromEnv();
 
 async function test() {
   const { data: barbearia } = await supabase.from('barbearias').select('id').limit(1);
@@ -39,8 +27,8 @@ async function test() {
     p_barbearia_id: barbearia_id,
     p_data: '2026-08-24',
     p_horario: '09:00',
-    p_nome: 'michel silva',
-    p_telefone: '(66) 99620-0180',
+    p_nome: 'Cliente Teste',
+    p_telefone: '(00) 00000-0000',
     p_barbeiro_id: barbeiro_id || null,
     p_servico_id: servico_id || null,
     p_carrinho_json: carrinhoParaBanco
