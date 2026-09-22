@@ -1,73 +1,20 @@
-# React + TypeScript + Vite
+# NØRDIK Cliente (App de Agendamento)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**O Front-end do cliente para o ecossistema NØRDIK.**
 
-Currently, two official plugins are available:
+Aplicativo web focado em conversão e usabilidade premium, desenhado para que os clientes das barbearias realizem agendamentos e acompanhem seus planos de fidelidade.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ? Funcionalidades
+- **Agendamento Inteligente:** Seleção de serviço, barbeiro e horários disponíveis em tempo real.
+- **Área VIP (Fidelidade):** Acesso simplificado ao cartão fidelidade digital.
+- **Planos e Assinaturas:** Exibição do catálogo de planos recorrentes do tenant ativo.
+- **Multi-tenant Dinâmico:** O app adapta o nome, logo, serviços e barbeiros com base na barbearia acessada via URL (ex: app.nordik.com/nome-da-barbearia).
 
-## React Compiler
+## ??? Segurança e Privacidade
+- **Data Validation no Banco:** O carrinho de serviços e os preços são sempre recalculados e validados pelo backend (Supabase RPCs), impossibilitando injeção de preços falsos.
+- **Isolamento Total:** RLS rigoroso garante que um usuário não consiga interagir com IDs ou agendas de barbearias concorrentes.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## ??? Stack Tecnológica
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS
+- **Integração:** Supabase Client (JS)
+- **Infra:** PWA Ready (Progressive Web App)
