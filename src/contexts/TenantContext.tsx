@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+﻿import { createContext, useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -28,7 +28,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadTenant() {
       if (!slug) {
-        setError('Barbearia não informada na URL.');
+        setError('Barbearia nÃ£o informada na URL.');
         setLoading(false);
         return;
       }
@@ -42,16 +42,14 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
 
         if (err || !barbearia) {
           console.error('Erro ao buscar barbearia:', err);
-          setError('Barbearia não encontrada ou inativa.');
+          setError('Barbearia nÃ£o encontrada ou inativa.');
           setLoading(false);
           return;
         }
 
-        // Busca as configurações dessa barbearia
+        // Busca as configuraÃ§Ãµes dessa barbearia
         const { data: configs } = await supabase
-          .from('configuracoes')
-          .select('chave, valor').limit(1000)
-          .eq('barbearia_id', barbearia.id);
+          .rpc('rpc_get_configuracoes_publicas', { p_barbearia_id: barbearia.id });
 
         const configuracoes: Record<string, string> = {};
         if (configs) {
@@ -82,3 +80,4 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     </TenantContext.Provider>
   );
 }
+
