@@ -9,7 +9,13 @@ import {
 } from "lucide-react";
 import { format, addDays, startOfToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useTenant } from "../contexts/TenantContext";
+import { useTenant } from "../hooks/useTenant";
+
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
 
 interface Barbeiro {
   id: string;
@@ -128,7 +134,7 @@ export function Agendamento() {
       }
     }
     if (tenant?.id) fetchIniciais();
-  }, [tenant?.id]);
+  }, [tenant?.id, tenant?.slug]);
 
   useEffect(() => {
     const buscarHorariosOcupados = async () => {
@@ -173,7 +179,7 @@ export function Agendamento() {
     if (step === 3 && barbeiroSelecionado) {
       buscarHorariosOcupados();
     }
-  }, [step, dataSelecionada, barbeiroSelecionado]);
+  }, [step, dataSelecionada, barbeiroSelecionado, tenant?.id]);
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, "");
@@ -231,7 +237,7 @@ export function Agendamento() {
         });
         localStorage.setItem(`@${tenant?.slug}:pm_phone`, pmTelefone);
       }
-    } catch (err) {
+    } catch {
       setPmMsg({ type: "error", text: "Erro de conexão. Tente novamente." });
     }
     setPmLoading(false);
@@ -268,16 +274,19 @@ export function Agendamento() {
 
       if (errAgenda || !sucesso) throw errAgenda || new Error("Falha ao criar agendamento");
       // Dispara o evento de Conversão para o Pixel do Facebook
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Schedule");
+      if (typeof window !== "undefined" && window.fbq) {
+        window.fbq("track", "Schedule");
       }
 
       // 4. Ir para sucesso
       setStep(5);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // Log completo fica só no console (debug); a tela mostra mensagem genérica
+      // para não expor detalhes internos do banco ao cliente.
       console.error("Erro ao agendar:", err);
-      // Exibindo o erro real na tela para debug
-      setError("Erro: " + (err.message || err.details || JSON.stringify(err)));
+      setError(
+        "Não foi possível confirmar o agendamento. Verifique seus dados e tente novamente."
+      );
     } finally {
       setLoading(false);
     }

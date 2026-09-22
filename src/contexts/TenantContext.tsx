@@ -1,23 +1,13 @@
-﻿import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getErrorMessage } from '../lib/errors';
+import { TenantContext, type Tenant } from './tenant-context';
 
-interface Tenant {
-  id: string;
-  nome: string;
-  slug: string;
-  configuracoes?: Record<string, string>;
+interface ConfiguracaoRow {
+  chave: string;
+  valor: string;
 }
-
-interface TenantContextType {
-  tenant: Tenant | null;
-  loading: boolean;
-  error: string | null;
-}
-
-const TenantContext = createContext<TenantContextType>({ tenant: null, loading: true, error: null });
-
-export const useTenant = () => useContext(TenantContext);
 
 export function TenantProvider({ children }: { children: React.ReactNode }) {
   const { slug } = useParams<{ slug: string }>();
@@ -28,7 +18,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadTenant() {
       if (!slug) {
-        setError('Barbearia nÃ£o informada na URL.');
+        setError('Barbearia não informada na URL.');
         setLoading(false);
         return;
       }
@@ -42,18 +32,18 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
 
         if (err || !barbearia) {
           console.error('Erro ao buscar barbearia:', err);
-          setError('Barbearia nÃ£o encontrada ou inativa.');
+          setError('Barbearia não encontrada ou inativa.');
           setLoading(false);
           return;
         }
 
-        // Busca as configuraÃ§Ãµes dessa barbearia
+        // Busca as configurações dessa barbearia
         const { data: configs } = await supabase
           .rpc('rpc_get_configuracoes_publicas', { p_barbearia_id: barbearia.id });
 
         const configuracoes: Record<string, string> = {};
         if (configs) {
-          configs.forEach(c => {
+          (configs as ConfiguracaoRow[]).forEach((c) => {
             configuracoes[c.chave] = c.valor;
           });
         }
@@ -64,8 +54,8 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
           slug: slug,
           configuracoes
         });
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
@@ -80,4 +70,3 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     </TenantContext.Provider>
   );
 }
-

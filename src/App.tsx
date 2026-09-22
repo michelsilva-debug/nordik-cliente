@@ -12,7 +12,8 @@ import {
 import { useState, useEffect } from "react";
 import { supabase } from "./lib/supabase";
 import { Agendamento } from "./pages/Agendamento";
-import { TenantProvider, useTenant } from "./contexts/TenantContext";
+import { TenantProvider } from "./contexts/TenantContext";
+import { useTenant } from "./hooks/useTenant";
 import { Vip } from "./pages/Vip";
 
 // Ícone do Instagram (SVG inline, pois lucide-react não exporta Instagram nesta versão)

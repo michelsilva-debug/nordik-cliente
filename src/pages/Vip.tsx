@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase';
 import { Crown, Star, Calendar, LogOut, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useTenant } from '../contexts/TenantContext';
+import { useTenant } from '../hooks/useTenant';
+import { getErrorMessage } from '../lib/errors';
 
 interface Cliente {
   id: string;
@@ -115,9 +116,10 @@ export function Vip() {
 
       localStorage.setItem(`@${tenant?.slug}:clienteId`, clienteId);
       await fetchClienteData(clienteId);
-    } catch (err: any) {
-      console.error(err);
-      setError('Erro: ' + (err.message || err.details || JSON.stringify(err)));
+    } catch (err: unknown) {
+      // Detalhe completo só no console (debug); tela mostra mensagem genérica.
+      console.error('Erro ao logar VIP:', getErrorMessage(err));
+      setError('Não foi possível acessar sua conta. Verifique seus dados e tente novamente.');
       setLoading(false);
     }
   };
