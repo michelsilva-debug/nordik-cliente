@@ -141,12 +141,10 @@ function Home() {
 
   useEffect(() => {
     async function fetchPlanos() {
-      const { data } = await supabase
-        .from("planos")
-        .select("*").limit(1000)
-        .eq("ativo", true)
-        .eq("barbearia_id", tenant?.id)
-        .order("preco");
+      // Usa RPC segura — acesso direto à tabela 'planos' foi bloqueado (Security Release 1.0)
+      const { data, error } = await supabase
+        .rpc("rpc_get_planos_publicos", { p_barbearia_id: tenant?.id });
+      if (error) console.error("Erro ao carregar planos:", error);
       if (data) setPlanos(data);
     }
     if (tenant?.id) fetchPlanos();

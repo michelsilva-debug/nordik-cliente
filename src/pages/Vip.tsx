@@ -322,7 +322,8 @@ export function Vip() {
         <div className="space-y-3">
           {historico.length === 0 ? (
             <div className="text-center p-6 border border-[var(--color-nordik-border)] bg-[var(--color-nordik-panel)] text-[var(--color-nordik-gold-dim)] text-xs">
-              Nenhum corte registrado ainda.
+              <div className="mb-2">🔒 Privacidade Ativada</div>
+              O histórico detalhado de visitas fica disponível apenas presencialmente na barbearia para proteger seus dados.
             </div>
           ) : (
             historico.map(h => (
