@@ -50,7 +50,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
         // Busca as configurações dessa barbearia
         const { data: configs } = await supabase
           .from('configuracoes')
-          .select('chave, valor')
+          .select('chave, valor').limit(1000)
           .eq('barbearia_id', barbearia.id);
 
         const configuracoes: Record<string, string> = {};

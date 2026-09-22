@@ -143,7 +143,7 @@ function Home() {
     async function fetchPlanos() {
       const { data } = await supabase
         .from("planos")
-        .select("*")
+        .select("*").limit(1000)
         .eq("ativo", true)
         .eq("barbearia_id", tenant?.id)
         .order("preco");
