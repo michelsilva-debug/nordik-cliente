@@ -142,13 +142,13 @@ export function Agendamento() {
 
       if (dataAgenda) {
         const blocosOcupados = new Set<string>();
-        dataAgenda.forEach((d) => {
+        dataAgenda.forEach((d: { horario: string; duracao_min: number }) => {
           if (!d.horario) return;
           const horaBase = d.horario.substring(0, 5);
           blocosOcupados.add(horaBase);
 
           // A nova RPC já retorna duracao_min
-          const duracao = (d as any).duracao_min || 30;
+          const duracao = d.duracao_min || 30;
           if (duracao > 30) {
             const slotsExtras = Math.ceil(duracao / 30) - 1;
             let [h, m] = horaBase.split(":").map(Number);
